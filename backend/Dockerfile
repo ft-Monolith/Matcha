@@ -1,8 +1,8 @@
+# Stage dev : les sources arrivent par le bind mount compose (./backend:/app).
 FROM node:22-alpine AS dev
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-COPY . .
 CMD ["npm", "run", "start:dev"]
 
 FROM node:22-alpine AS build
