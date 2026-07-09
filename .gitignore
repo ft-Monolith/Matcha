@@ -1,0 +1,14 @@
+# Secrets — JAMAIS commités (règle sujet : stockage public = échec du projet)
+.env
+
+# Dépendances & builds
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Uploads locaux
+uploads/
+
+# Divers
+*.log
+.DS_Store
