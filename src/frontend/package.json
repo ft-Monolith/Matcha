@@ -1,0 +1,35 @@
+{
+  "name": "frontend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Matcha — frontend",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@legendapp/state": "2.1.15",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.15.1",
+    "clsx": "2.1.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-hook-form": "7.81.0",
+    "react-router-dom": "7.18.1",
+    "tailwind-merge": "3.6.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.2",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "tailwindcss": "4.3.2",
+    "typescript": "5.9.3",
+    "vite": "8.1.4"
+  }
+}

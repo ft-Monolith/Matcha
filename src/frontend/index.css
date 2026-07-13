@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* c est le file pour les variables CSS globales, pas pour le CSS de l'app
+@theme {
+  --color-matcha: #6f9c3d;
+}
+*/
+
+html,
+body,
+#root {
+  height: 100%;
+}

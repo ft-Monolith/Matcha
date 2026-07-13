@@ -1,16 +1,25 @@
-# Secrets — JAMAIS commités (règle sujet : stockage public = échec du projet)
 .env
+.env.*
+!.env.example
 
-# Dépendances & builds
 node_modules/
-dist/
-*.tsbuildinfo
+.pnpm-store/
 
-# Uploads locaux
+dist/
+build/
+*.tsbuildinfo
+.vite/
+coverage/
+
 uploads/
 
-# Divers
 *.log
+npm-debug.log*
+pnpm-debug.log*
+
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
 
 CLAUDE.md
