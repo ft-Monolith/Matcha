@@ -23,6 +23,7 @@
     "paths": {
       "@common/*": ["../common/*"],
       "@web/*": ["./Web/*"],
+      "@shadcn": ["./shadcn"],
       "@shadcn/*": ["./shadcn/*"]
     }
   },

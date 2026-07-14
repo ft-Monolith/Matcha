@@ -23,3 +23,6 @@ Thumbs.db
 .idea/
 
 CLAUDE.md
+
+# Réglages d'équipe (le reste de .vscode reste ignoré)
+!.vscode/settings.json
