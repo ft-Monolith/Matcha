@@ -19,7 +19,6 @@
     "isolatedModules": true,
 
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
 
     "paths": {
       "@common/*": ["../common/*"],
