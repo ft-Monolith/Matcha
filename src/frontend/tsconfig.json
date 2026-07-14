@@ -27,5 +27,5 @@
       "@shadcn/*": ["./shadcn/*"]
     }
   },
-  "include": ["main.tsx", "Web", "shadcn", "../common", "vite.config.ts"]
+  "include": ["Web", "shadcn", "../common", "vite.config.ts"]
 }
