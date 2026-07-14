@@ -7,11 +7,14 @@ import { Routes } from "@common/routes/routes";
 import { env } from "./app/config/env";
 import { createSqlClient } from "./database/client";
 import { errorMiddleware, notFoundMiddleware } from "./app/middlewares/error";
+import { TransformersService } from "./app/services/transformers.service";
 import { ControllerHealthModule } from "./health/health.module";
 
 
 async function main() {
+  // Dépendances PARTAGÉES : créées ici une seule fois, puis injectées aux modules.
   const sql = createSqlClient();
+  const transformers = new TransformersService();
 
   const app = express();
 
@@ -21,7 +24,7 @@ async function main() {
   app.use(express.json()); // parse les corps JSON
 
   // Chaque domaine renvoie un Router, monté sur son chemin partagé (src/common/routes).
-  app.use(Routes.Health, ControllerHealthModule({ sql }));
+  app.use(Routes.Health, ControllerHealthModule({ sql, transformers }));
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
