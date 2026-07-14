@@ -33,7 +33,5 @@ export class TransformersService {
     };
   }
 
-  // À venir :
-  // userToDTO(user: UserEntity): UserDTO { ... }        ← vue publique
-  // userToPrivateDTO(user: UserEntity): UserPrivateDTO  ← + email, pour le propriétaire
+  // À
 }
