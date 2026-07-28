@@ -18,7 +18,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
-    hmr: { clientPort: 8080 },
+    hmr: { protocol: "wss", clientPort: 8443 },
     watch: { usePolling: true },
   },
 });

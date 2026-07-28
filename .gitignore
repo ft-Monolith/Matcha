@@ -13,6 +13,8 @@ coverage/
 
 uploads/
 
+nginx/certs/
+
 *.log
 npm-debug.log*
 pnpm-debug.log*
@@ -24,5 +26,4 @@ Thumbs.db
 
 CLAUDE.md
 
-# Réglages d'équipe (le reste de .vscode reste ignoré)
 !.vscode/settings.json
