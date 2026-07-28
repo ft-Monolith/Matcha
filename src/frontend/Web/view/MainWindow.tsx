@@ -34,7 +34,7 @@ export function MainWindow() {
       <main className="flex-1 px-4 py-6">
         <div className="mx-auto flex max-w-md flex-col items-center gap-4">
           <Button onClick={checkHealth} disabled={loading}>
-            {loading ? "Vérification…" : "Tester l'API"}
+            {loading ? "Checking…" : "Test API"}
           </Button>
 
           {health && (

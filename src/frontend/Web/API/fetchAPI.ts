@@ -8,13 +8,10 @@
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface Args {
-  /** Devient une query string : { age: 25 } → "?age=25" */
   query?: object;
   body?: object;
   headers?: object;
-  /** Permet d'annuler la requête (ex : au démontage d'un composant). */
   abort?: AbortController;
-  /** Interne : évite une boucle infinie de refresh de token. */
   retrying?: boolean;
 }
 
@@ -79,7 +76,6 @@ export async function fetchAPI<T>(
     const body = await getBody(res);
 
     // TODO(auth) : sur 401, tenter API.auth.refresh() puis rejouer la requête
-    // (une seule fois, d'où le flag `retrying`).
 
     if (!res.ok) {
       const message =
@@ -97,8 +93,6 @@ export async function fetchAPI<T>(
       error: false,
     };
   } catch {
-    // Le serveur est injoignable (réseau coupé, backend down) : fetch lève.
-    // On le convertit en APIError pour garder un type de retour unique.
-    return { status: 0, statusText: "Network Error", data: "Serveur injoignable", error: true };
+    return { status: 0, statusText: "Network Error", data: "Server unreachable", error: true };
   }
 }
