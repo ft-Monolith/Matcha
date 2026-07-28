@@ -6,6 +6,7 @@ import { Routes } from "@common/routes/routes";
 
 import { env } from "./app/config/env";
 import { createSqlClient } from "./database/client";
+import { runMigrations } from "./database/migrator";
 import { errorMiddleware, notFoundMiddleware } from "./app/middlewares/error";
 import { TransformersService } from "./app/services/transformers.service";
 import { ControllerHealthModule } from "./health/health.module";
@@ -16,6 +17,9 @@ async function main() {
   const sql = createSqlClient();
   const transformers = new TransformersService();
 
+  // Applique les migrations SQL AVANT de servir la moindre requête (idempotent).
+  await runMigrations(sql);
+
   const app = express();
 
   app.use(helmet()); // en-têtes de sécurité (XSS, clickjacking…)
@@ -23,7 +27,6 @@ async function main() {
   app.use(cookieParser()); // parse les cookies httpOnly (auth, plus tard)
   app.use(express.json()); // parse les corps JSON
 
-  // Chaque domaine renvoie un Router, monté sur son chemin partagé (src/common/routes).
   app.use(Routes.Health, ControllerHealthModule({ sql, transformers }));
 
   app.use(notFoundMiddleware);
