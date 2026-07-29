@@ -1,4 +1,6 @@
 import type { HealthDTO } from "@common/dto/health.dto";
+import type { UserDTO } from "@common/dto/user.dto";
+import type { UserEntity } from "../../database/entities/user.entity";
 
 /**
  * TRANSFORMERS — la frontière de sortie de l'API.
@@ -33,5 +35,16 @@ export class TransformersService {
     };
   }
 
-  // À
+  userToDTO(user: UserEntity): UserDTO {
+    const { id, username, first_name, last_name, email_verified, created_at } = user;
+
+    return {
+      id,
+      username,
+      firstName: first_name,
+      lastName: last_name,
+      emailVerified: email_verified,
+      createdAt: created_at.toISOString(),
+    };
+  }
 }

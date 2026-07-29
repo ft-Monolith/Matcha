@@ -2,5 +2,9 @@ export const Routes = {
   Api: "/api",
 
   Health: "/api/health",
-  register: "/api/register",
+
+  Auth: {
+    Base: "/api/auth",
+    Register: "/api/auth/register",
+  },
 } as const;

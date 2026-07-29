@@ -10,24 +10,25 @@ import { runMigrations } from "./database/migrator";
 import { errorMiddleware, notFoundMiddleware } from "./app/middlewares/error";
 import { TransformersService } from "./app/services/transformers.service";
 import { ControllerHealthModule } from "./health/health.module";
+import { ControllerAuthModule } from "./auth/auth.module";
 
 
 async function main() {
-  // Dépendances PARTAGÉES : créées ici une seule fois, puis injectées aux modules.
   const sql = createSqlClient();
   const transformers = new TransformersService();
 
-  // Applique les migrations SQL AVANT de servir la moindre requête (idempotent).
+  // Applique les migrations SQL AVANT de servir la moindre requête
   await runMigrations(sql);
 
   const app = express();
 
-  app.use(helmet()); // en-têtes de sécurité (XSS, clickjacking…)
+  app.use(helmet()); // en-têtes de sécurité
   app.use(cors({ origin: env.appUrl, credentials: true })); // credentials → cookies de session
   app.use(cookieParser()); // parse les cookies httpOnly (auth, plus tard)
   app.use(express.json()); // parse les corps JSON
 
   app.use(Routes.Health, ControllerHealthModule({ sql, transformers }));
+  app.use(Routes.Auth.Base, ControllerAuthModule({ sql, transformers }));
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
