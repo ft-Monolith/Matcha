@@ -23,3 +23,9 @@ export class RegisterDTO {
   @IsStrongPassword()
   password!: string;
 }
+
+export class VerifyEmailDTO {
+  @IsString()
+  @Length(64, 64, { message: "Invalid token" }) 
+  token!: string;
+}

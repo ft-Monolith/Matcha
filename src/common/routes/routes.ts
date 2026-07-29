@@ -6,5 +6,6 @@ export const Routes = {
   Auth: {
     Base: "/api/auth",
     Register: "/api/auth/register",
+    Verify: "/api/auth/verify",
   },
 } as const;

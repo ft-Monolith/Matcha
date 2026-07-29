@@ -42,4 +42,12 @@ export class UserRepository {
       username: rows.some((r) => r.username.toLowerCase() === username.toLowerCase()),
     };
   }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await this.sql`
+      UPDATE users
+      SET email_verified = true, updated_at = now()
+      WHERE id = ${userId}
+    `;
+  }
 }
