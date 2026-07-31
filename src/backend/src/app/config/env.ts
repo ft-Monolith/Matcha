@@ -18,6 +18,13 @@ export const env = {
 
   databaseUrl: required("DATABASE_URL"),
 
+  jwt: {
+    accessSecret: required("JWT_ACCESS_SECRET"),
+    refreshSecret: required("JWT_REFRESH_SECRET"),
+    accessTtl: "15m",
+    refreshTtl: "7d",
+  },
+
   smtp: {
     host: optional("SMTP_HOST", "mailpit"),
     port: Number(optional("SMTP_PORT", "1025")),

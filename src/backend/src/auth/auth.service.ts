@@ -1,15 +1,23 @@
 import argon2 from "argon2";
 import type { RegisterDTO } from "@common/dto/register.dto";
+import type { LoginDTO } from "@common/dto/login.dto";
 import type { UserDTO } from "@common/dto/user.dto";
 import type { UserRepository } from "../database/repositories/user.repository";
 import type { EmailVerificationTokenRepository } from "../database/repositories/emailVerificationToken.repository";
 import type { TransformersService } from "../app/services/transformers.service";
 import type { MailerService } from "../app/services/mailer.service";
 import { generateToken, hashToken } from "../app/tokens";
+import { signAccessToken, signRefreshToken, type JwtPayload } from "../app/jwt";
 import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
 
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 h
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  user: UserDTO;
+}
 
 export class AuthService {
   constructor(
@@ -46,6 +54,47 @@ export class AuthService {
       throw new HttpError(400, "Invalid or expired verification link");
     }
     await this.users.markEmailVerified(userId);
+  }
+
+  async login(input: LoginDTO): Promise<AuthTokens> {
+    const user = await this.users.findByUsername(input.username);
+
+    const hash = user?.password_hash ?? "$mdp$v=19$m=de,t=3,p=4$co$sasadas";
+    // c est une protection pour veriier le mdp meme si le user existepas
+    // si on le fait pas l'attaquant peut savoir si le user existe ou pas en mesurant le temps de reponse
+    const ok = await argon2.verify(hash, input.password);
+
+    if (!user || !ok) {
+      throw new HttpError(401, "Invalid credentials");
+    }
+
+    if (!user.email_verified) {
+      throw new HttpError(403, "Please verify your email before logging in");
+    }
+
+    return this.issueTokens({ sub: user.id, username: user.username }, user);
+  }
+
+  async refresh(payload: JwtPayload): Promise<AuthTokens> {
+    const user = await this.users.findByUsername(payload.username);
+    if (!user) {
+      throw new HttpError(401, "Invalid session");
+    }
+    return this.issueTokens({ sub: user.id, username: user.username }, user);
+  }
+
+  async getMe(userId: string): Promise<UserDTO> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new HttpError(404, "User not found");
+    return this.transformers.userToDTO(user);
+  }
+
+  private issueTokens(payload: JwtPayload, user: Parameters<TransformersService["userToDTO"]>[0]): AuthTokens {
+    return {
+      accessToken: signAccessToken(payload),
+      refreshToken: signRefreshToken(payload),
+      user: this.transformers.userToDTO(user),
+    };
   }
 
   private async sendVerificationEmail(userId: string, email: string, firstName: string) {
