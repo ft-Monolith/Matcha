@@ -1,6 +1,7 @@
 import type { Request, Response, Router } from "express";
 import { RegisterDTO, VerifyEmailDTO } from "@common/dto/register.dto";
 import { LoginDTO } from "@common/dto/login.dto";
+import { ForgotPasswordDTO, ResetPasswordDTO } from "@common/dto/reset-password.dto";
 import type { AuthService } from "./auth.service";
 import { validate } from "../app/middlewares/validate";
 import { authGuard } from "../app/middlewares/authGuard";
@@ -20,6 +21,8 @@ export class AuthController {
     router.post("/refresh", this.refreshHandler);
     router.post("/logout", this.logoutHandler);
     router.get("/me", authGuard, this.meHandler);
+    router.post("/forgot-password", validate(ForgotPasswordDTO), this.forgotPasswordHandler);
+    router.post("/reset-password", validate(ResetPasswordDTO), this.resetPasswordHandler);
   }
 
   private registerHandler = async (req: Request, res: Response) => {
@@ -62,5 +65,16 @@ export class AuthController {
   private meHandler = async (req: Request, res: Response) => {
     const session = getSession(req);
     res.status(200).json(await this.service.getMe(session.userId));
+  };
+
+  private forgotPasswordHandler = async (req: Request, res: Response) => {
+    await this.service.requestPasswordReset((req.body as ForgotPasswordDTO).email);
+    res.status(200).json({ message: "If an account exists, a reset link has been sent" });
+  };
+
+  private resetPasswordHandler = async (req: Request, res: Response) => {
+    const { token, password } = req.body as ResetPasswordDTO;
+    await this.service.resetPassword(token, password);
+    res.status(200).json({ ok: true });
   };
 }

@@ -64,4 +64,19 @@ export class UserRepository {
     `;
     return user ?? null;
   }
+
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    const [user] = await this.sql<UserEntity[]>`
+      SELECT * FROM users WHERE email = ${email}
+    `;
+    return user ?? null;
+  }
+
+  async updatePassword(userId: string, passwordHash: string): Promise<void> {
+    await this.sql`
+      UPDATE users
+      SET password_hash = ${passwordHash}, updated_at = now()
+      WHERE id = ${userId}
+    `;
+  }
 }

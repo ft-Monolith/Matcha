@@ -11,5 +11,7 @@ export const Routes = {
     Refresh: "/api/auth/refresh",
     Logout: "/api/auth/logout",
     Me: "/api/auth/me",
+    ForgotPassword: "/api/auth/forgot-password",
+    ResetPassword: "/api/auth/reset-password",
   },
 } as const;

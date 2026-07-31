@@ -4,6 +4,7 @@ import type { LoginDTO } from "@common/dto/login.dto";
 import type { UserDTO } from "@common/dto/user.dto";
 import type { UserRepository } from "../database/repositories/user.repository";
 import type { EmailVerificationTokenRepository } from "../database/repositories/emailVerificationToken.repository";
+import type { PasswordResetTokenRepository } from "../database/repositories/passwordResetToken.repository";
 import type { TransformersService } from "../app/services/transformers.service";
 import type { MailerService } from "../app/services/mailer.service";
 import { generateToken, hashToken } from "../app/tokens";
@@ -12,6 +13,7 @@ import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
 
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 h
+const RESET_TTL_MS = 60 * 60 * 1000; // 1 h 
 
 export interface AuthTokens {
   accessToken: string;
@@ -23,6 +25,7 @@ export class AuthService {
   constructor(
     private readonly users: UserRepository,
     private readonly tokens: EmailVerificationTokenRepository,
+    private readonly resetTokens: PasswordResetTokenRepository,
     private readonly mailer: MailerService,
     private readonly transformers: TransformersService,
   ) {}
@@ -59,9 +62,10 @@ export class AuthService {
   async login(input: LoginDTO): Promise<AuthTokens> {
     const user = await this.users.findByUsername(input.username);
 
-    const hash = user?.password_hash ?? "$mdp$v=19$m=de,t=3,p=4$co$sasadas";
+    const hash = user?.password_hash ?? "$argon2id$v=19$m=65536,t=3,p=4$aaaaaaaaaaaaaaaa$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     // c est une protection pour veriier le mdp meme si le user existepas
     // si on le fait pas l'attaquant peut savoir si le user existe ou pas en mesurant le temps de reponse
+    // type comme un argon hash
     const ok = await argon2.verify(hash, input.password);
 
     if (!user || !ok) {
@@ -87,6 +91,39 @@ export class AuthService {
     const user = await this.users.findById(userId);
     if (!user) throw new HttpError(404, "User not found");
     return this.transformers.userToDTO(user);
+  }
+
+
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.users.findByEmail(email);
+    if (!user) return; // silencieux pas d erreur pour pas sortir de donner
+
+    const { token, tokenHash } = generateToken();
+    await this.resetTokens.create(user.id, tokenHash, new Date(Date.now() + RESET_TTL_MS));
+
+    const link = `${env.appUrl}/reset-password?token=${token}`;
+    try {
+      await this.mailer.send(
+        email,
+        "Reset your Matcha password",
+        `<p>Hi ${user.first_name},</p>
+         <p>You requested a password reset. Click the link below to choose a new password:</p>
+         <p><a href="${link}">Reset my password</a></p>
+         <p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>`,
+      );
+    } catch (err) {
+      console.error("[auth] reset email failed:", err);
+    }
+  }
+
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const userId = await this.resetTokens.consumeValid(hashToken(token));
+    if (!userId) {
+      throw new HttpError(400, "Invalid or expired reset link");
+    }
+    const password_hash = await argon2.hash(newPassword);
+    await this.users.updatePassword(userId, password_hash);
   }
 
   private issueTokens(payload: JwtPayload, user: Parameters<TransformersService["userToDTO"]>[0]): AuthTokens {
