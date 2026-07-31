@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { HealthDTO } from "@common/dto/health.dto";
 import { API } from "@web/API/api";
+import { $user, $use } from "@web/observables/observables";
 import { loadingWrapper } from "@web/utils/loadingWrapper";
 import { Button } from "@shadcn/ui/button";
 import { Badge } from "@shadcn/ui/badge";
@@ -9,7 +10,11 @@ export function MainWindow() {
   const [loading, setLoading] = useState(false);
   const [health, setHealth] = useState<HealthDTO | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const user = $use($user);
 
+  function logout() {
+    return API.auth.logout().then(() => $user.set(null));
+  }
 
   function checkHealth() {
     return loadingWrapper(setLoading, () =>
@@ -27,8 +32,14 @@ export function MainWindow() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex items-center border-b px-4 py-3">
+      <header className="flex items-center justify-between border-b px-4 py-3">
         <span className="text-lg font-semibold">Matcha</span>
+        <div className="flex items-center gap-3">
+          {user && <span className="text-sm text-muted-foreground">@{user.username}</span>}
+          <Button variant="outline" size="sm" onClick={logout}>
+            Log out
+          </Button>
+        </div>
       </header>
 
       <main className="flex-1 px-4 py-6">
