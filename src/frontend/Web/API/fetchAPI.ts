@@ -1,9 +1,6 @@
 /**
- * Wrapper fetch BAS NIVEAU — le seul endroit du front qui touche réellement au réseau.
- *
- * Il renvoie TOUJOURS un `APIResponse`, jamais d'exception : le code appelant teste
- * `if (r.error)` et n'a jamais besoin de try/catch.
- */
+ * Wrapper fetch 
+**/
 
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -26,7 +23,7 @@ export interface APISuccess<T> extends APIGenericResponse<T> {
   error: false;
 }
 
-/** En cas d'erreur, `data` porte le message du back (ou les erreurs de validation). */
+/** En cas d'erreur, `data` porte le message du back */
 export interface APIError extends APIGenericResponse<string | Record<string, Array<string>>> {
   error: true;
 }

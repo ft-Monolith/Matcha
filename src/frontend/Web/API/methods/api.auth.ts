@@ -17,7 +17,7 @@ export class APIAuth extends IAPI {
     return this.fetch("POST", Routes.Auth.Verify, { body });
   }
 
-  /** POST /api/auth/login → pose les cookies (côté serveur) et renvoie le user. */
+  /** POST /api/auth/login → pose les cookies  et renvoie le user. */
   login(body: LoginDTO): Promise<APIResponse<UserDTO>> {
     return this.fetch<UserDTO>("POST", Routes.Auth.Login, { body });
   }
