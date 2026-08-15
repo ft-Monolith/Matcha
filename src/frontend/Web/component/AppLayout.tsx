@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { API } from "@web/API/api";
 import { $user, $use } from "@web/observables/observables";
 import { Button } from "@shadcn/ui/button";
+import { Toaster } from "@shadcn/ui/sonner";
 import { BottomNav } from "@web/component/BottomNav";
 
 export function AppLayout() {
@@ -28,6 +29,8 @@ export function AppLayout() {
       </main>
 
       <BottomNav />
+
+      <Toaster position="top-right" />
     </div>
   );
 }

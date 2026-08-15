@@ -7,9 +7,6 @@ import {
 } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
-// Version d'origine de shadcn : elle importe `useTheme` de `next-themes` (une lib
-// Next.js). On est sur Vite → dépendance inutile. `sonner` gère déjà `theme="system"`
-// nativement (il suit prefers-color-scheme). On peut donc surcharger via la prop `theme`.
 const Toaster = ({ theme = "system", ...props }: ToasterProps) => {
   return (
     <Sonner
