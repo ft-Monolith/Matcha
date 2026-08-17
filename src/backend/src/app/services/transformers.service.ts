@@ -1,27 +1,22 @@
 import type { HealthDTO } from "@common/dto/health.dto";
 import type { UserDTO } from "@common/dto/user.dto";
+import type { MyProfileDTO, ProfileDTO } from "@common/dto/profile.dto";
 import type { UserEntity } from "../../database/entities/user.entity";
+import type { ProfileEntity } from "../../database/entities/profile.entity";
+import type { TagEntity } from "../../database/entities/tag.entity";
+import type { PictureEntity } from "../../database/entities/picture.entity";
 
-/**
- * TRANSFORMERS — la frontière de sortie de l'API.
- *
- * RÈGLE D'OR : rien ne quitte le backend sans passer par ici. Une entity (ligne SQL
- * brute) n'est JAMAIS renvoyée telle quelle — sinon un `password_hash` ou un `email`
- * privé finirait dans la réponse JSON.
- *
- * Convention : UNE méthode `xToDTO(entity): XDTO` par cas, avec un destructuring
- * EXPLICITE → objet littéral. C'est le destructuring qui fait la sécurité : un champ
- * non listé ne peut pas sortir, même si on l'ajoute plus tard en base.
- *
- * Instancié UNE fois dans main.ts (composition root) et injecté aux services.
- */
 
-/** État interne, non exposé. C'est la « matière première » du DTO. */
-
-// TODO: ca faudrait le bouger ailleur voir l infra
 export interface HealthSnapshot {
   dbUp: boolean;
   uptimeSeconds: number;
+}
+
+export interface ProfileAggregate {
+  user: UserEntity;
+  profile: ProfileEntity | null;
+  tags: TagEntity[];
+  pictures: PictureEntity[];
 }
 
 export class TransformersService {
@@ -46,5 +41,34 @@ export class TransformersService {
       emailVerified: email_verified,
       createdAt: created_at.toISOString(),
     };
+  }
+
+  profileToDTO(agg: ProfileAggregate): ProfileDTO {
+    const { user, profile, tags, pictures } = agg;
+
+    return {
+      userId: user.id,
+      username: user.username,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      gender: profile?.gender ?? null,
+      sexualPref: profile?.sexual_pref ?? "bi",
+      biography: profile?.biography ?? null,
+      birthdate: profile?.birthdate ? this.toISODate(profile.birthdate) : null,
+      tags: tags.map((t) => ({ id: t.id, name: t.name })),
+      pictures: pictures.map((p) => ({
+        id: p.id,
+        url: `/uploads/${p.filename}`,
+        isProfile: p.is_profile,
+      })),
+    };
+  }
+
+  myProfileToDTO(agg: ProfileAggregate): MyProfileDTO {
+    return { ...this.profileToDTO(agg), email: agg.user.email };
+  }
+
+  private toISODate(date: Date): string {
+    return date.toISOString().slice(0, 10);
   }
 }

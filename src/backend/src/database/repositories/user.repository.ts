@@ -79,4 +79,20 @@ export class UserRepository {
       WHERE id = ${userId}
     `;
   }
+
+  async updateAccount(
+    userId: string,
+    input: { first_name: string; last_name: string; email: string },
+  ): Promise<UserEntity> {
+    const [user] = await this.sql<UserEntity[]>`
+      UPDATE users
+      SET first_name = ${input.first_name},
+          last_name  = ${input.last_name},
+          email      = ${input.email},
+          updated_at = now()
+      WHERE id = ${userId}
+      RETURNING *
+    `;
+    return user;
+  }
 }

@@ -14,4 +14,15 @@ export const Routes = {
     ForgotPassword: "/api/auth/forgot-password",
     ResetPassword: "/api/auth/reset-password",
   },
+
+  Profile: {
+    Base: "/api/profile",
+    Me: "/api/profile/me",
+    Update: "/api/profile",
+    Account: "/api/profile/account",
+    Tags: "/api/profile/tags",
+    Photos: "/api/profile/photos",
+    Photo: "/api/profile/photos/:id",
+    PhotoProfile: "/api/profile/photos/:id/profile",
+  },
 } as const;

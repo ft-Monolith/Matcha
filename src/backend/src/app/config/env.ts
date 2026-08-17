@@ -18,6 +18,8 @@ export const env = {
 
   databaseUrl: required("DATABASE_URL"),
 
+  uploadsDir: optional("UPLOADS_DIR", "/app/uploads"),
+
   jwt: {
     accessSecret: required("JWT_ACCESS_SECRET"),
     refreshSecret: required("JWT_REFRESH_SECRET"),
