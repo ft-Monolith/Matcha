@@ -16,8 +16,8 @@ export function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between border-b px-4 py-3">
+    <div className="flex h-dvh flex-col">
+      <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
         <span className="text-lg font-semibold">Matcha</span>
         <div className="flex items-center gap-3">
           {user && <span className="text-muted-foreground text-sm">@{user.username}</span>}
@@ -27,7 +27,7 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col px-4 py-6">
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6">
         <Outlet />
       </main>
 

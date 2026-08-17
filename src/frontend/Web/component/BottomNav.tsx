@@ -13,7 +13,7 @@ const items = [
 
 export function BottomNav() {
   return (
-    <footer className="border-t">
+    <footer className="shrink-0 border-t">
       <nav className="mx-auto flex max-w-md items-stretch justify-around">
         {items.map(({ to, icon: Icon, label }) => (
           <NavLink
