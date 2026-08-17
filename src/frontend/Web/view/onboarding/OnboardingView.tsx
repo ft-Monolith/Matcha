@@ -28,6 +28,7 @@ export function OnboardingView() {
     consent: false,
   });
   const [saving, setSaving] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     API.profile.getMe().then((r) => {
@@ -51,7 +52,7 @@ export function OnboardingView() {
   const pictures = profile?.pictures ?? [];
 
   function logout() {
-    return API.auth.logout().then(() => $user.set(null));
+    return loadingWrapper(setLoggingOut, () => API.auth.logout().then(() => $user.set(null)));
   }
 
   function finish() {
@@ -103,9 +104,8 @@ export function OnboardingView() {
             A few details before you can start browsing.
           </p>
         </div>
-        {/* Logout dispo même ici (§IV.1 : déconnexion depuis n'importe quelle page). */}
-        <Button variant="ghost" size="sm" onClick={logout}>
-          Log out
+        <Button variant="ghost" size="sm" disabled={loggingOut} onClick={logout}>
+          {loggingOut ? "…" : "Log out"}
         </Button>
       </div>
 
