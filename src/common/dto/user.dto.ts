@@ -5,5 +5,6 @@ export class UserDTO {
   firstName!: string;
   lastName!: string;
   emailVerified!: boolean;
+  onboarded!: boolean;
   createdAt!: string;
 }

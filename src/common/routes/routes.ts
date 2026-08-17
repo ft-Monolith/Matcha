@@ -21,6 +21,8 @@ export const Routes = {
     Update: "/api/profile",
     Account: "/api/profile/account",
     Tags: "/api/profile/tags",
+    Location: "/api/profile/location",
+    Onboarding: "/api/profile/onboarding",
     Photos: "/api/profile/photos",
     Photo: "/api/profile/photos/:id",
     PhotoProfile: "/api/profile/photos/:id/profile",

@@ -3,8 +3,10 @@ import type {
   MyProfileDTO,
   SetTagsDTO,
   UpdateAccountDTO,
+  UpdateLocationDTO,
   UpdateProfileDTO,
 } from "@common/dto/profile.dto";
+import type { UserDTO } from "@common/dto/user.dto";
 import { Routes } from "@common/routes/routes";
 import type { APIResponse } from "../fetchAPI";
 import { IAPI } from "../interface";
@@ -24,6 +26,14 @@ export class APIProfile extends IAPI {
 
   setTags(body: SetTagsDTO): Promise<APIResponse<MyProfileDTO>> {
     return this.fetch<MyProfileDTO>("PUT", Routes.Profile.Tags, { body });
+  }
+
+  updateLocation(body: UpdateLocationDTO): Promise<APIResponse<MyProfileDTO>> {
+    return this.fetch<MyProfileDTO>("PUT", Routes.Profile.Location, { body });
+  }
+
+  completeOnboarding(): Promise<APIResponse<UserDTO>> {
+    return this.fetch<UserDTO>("POST", Routes.Profile.Onboarding);
   }
 
   addPhoto(body: AddPhotoDTO): Promise<APIResponse<MyProfileDTO>> {

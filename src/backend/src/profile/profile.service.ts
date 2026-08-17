@@ -6,8 +6,10 @@ import type {
   MyProfileDTO,
   SetTagsDTO,
   UpdateAccountDTO,
+  UpdateLocationDTO,
   UpdateProfileDTO,
 } from "@common/dto/profile.dto";
+import type { UserDTO } from "@common/dto/user.dto";
 import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
 import type { TransformersService } from "../app/services/transformers.service";
@@ -72,7 +74,6 @@ export class ProfileService {
         email: dto.email,
       });
     } catch (err) {
-      // 23505 = violation de contrainte unique Postgres (e-mail déjà utilisé).
       if (typeof err === "object" && err !== null && "code" in err && err.code === "23505") {
         throw new HttpError(409, "Email already in use");
       }
@@ -80,6 +81,41 @@ export class ProfileService {
     }
 
     return this.getMe(userId);
+  }
+
+
+  async updateLocation(userId: string, dto: UpdateLocationDTO): Promise<MyProfileDTO> {
+    await this.profiles.updateLocation(userId, {
+      latitude: dto.latitude ?? null,
+      longitude: dto.longitude ?? null,
+      city: dto.city ?? null,
+      location_consent: dto.consent ?? false,
+    });
+
+    return this.getMe(userId);
+  }
+
+  async completeOnboarding(userId: string): Promise<UserDTO> {
+    const [profile, tags, pictures] = await Promise.all([
+      this.profiles.findByUserId(userId),
+      this.tags.findByUserId(userId),
+      this.pictures.findByUserId(userId),
+    ]);
+
+    const missing: string[] = [];
+    if (!profile?.gender) missing.push("gender");
+    if (!profile?.birthdate) missing.push("birthdate");
+    if (!profile?.biography || profile.biography.trim() === "") missing.push("biography");
+    if (!profile?.city) missing.push("location");
+    if (tags.length === 0) missing.push("at least one tag");
+    if (pictures.length === 0) missing.push("at least one photo");
+
+    if (missing.length > 0) {
+      throw new HttpError(400, "Profile is incomplete", missing);
+    }
+
+    const user = await this.users.markOnboarded(userId);
+    return this.transformers.userToDTO(user);
   }
 
   async setTags(userId: string, dto: SetTagsDTO): Promise<MyProfileDTO> {
@@ -117,10 +153,12 @@ export class ProfileService {
     const picture = await this.pictures.findById(pictureId);
     if (!picture || picture.user_id !== userId) throw new HttpError(404, "Photo not found");
 
+    const count = await this.pictures.countByUserId(userId);
+    if (count <= 1) throw new HttpError(400, "You must keep at least one photo");
+
     await this.pictures.delete(pictureId);
     await unlink(join(env.uploadsDir, picture.filename)).catch(() => {});
 
-    // Si on vient de supprimer la photo de profil, on en promeut une autre (la 1ʳᵉ restante).
     if (picture.is_profile) {
       const remaining = await this.pictures.findByUserId(userId);
       if (remaining.length > 0) {

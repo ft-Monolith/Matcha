@@ -11,6 +11,7 @@ import { generateToken, hashToken } from "../app/tokens";
 import { signAccessToken, signRefreshToken, type JwtPayload } from "../app/jwt";
 import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
+import { escapeHtml } from "../app/html";
 
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 h
 const RESET_TTL_MS = 60 * 60 * 1000; // 1 h 
@@ -106,7 +107,7 @@ export class AuthService {
       await this.mailer.send(
         email,
         "Reset your Matcha password",
-        `<p>Hi ${user.first_name},</p>
+        `<p>Hi ${escapeHtml(user.first_name)},</p>
          <p>You requested a password reset. Click the link below to choose a new password:</p>
          <p><a href="${link}">Reset my password</a></p>
          <p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>`,
@@ -145,7 +146,7 @@ export class AuthService {
       await this.mailer.send(
         email,
         "Verify your Matcha account",
-        `<p>Hi ${firstName},</p>
+        `<p>Hi ${escapeHtml(firstName)},</p>
          <p>Welcome to Matcha! Please confirm your email address by clicking the link below:</p>
          <p><a href="${link}">Verify my account</a></p>
          <p>This link expires in 24 hours.</p>`,

@@ -6,6 +6,7 @@ export interface UserEntity {
   first_name: string;
   password_hash: string;
   email_verified: boolean;
+  onboarded: boolean;
   created_at: Date;
   updated_at: Date;
 }

@@ -1,7 +1,6 @@
-import { Placeholder } from "@web/component/Placeholder";
+import { Navigate } from "react-router-dom";
+import { WebRoutes } from "@web/routes";
 
 export function EditProfileView() {
-  return <Placeholder title="Edit profile" />;
+  return <Navigate to={WebRoutes.Profile} replace />;
 }
-
-// va surement changer pour une dialog

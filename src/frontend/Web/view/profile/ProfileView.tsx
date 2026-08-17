@@ -1,8 +1,35 @@
-import { Placeholder } from "@web/component/Placeholder";
+import { useEffect, useState } from "react";
+import type { MyProfileDTO } from "@common/dto/profile.dto";
+import { API } from "@web/API/api";
+import { ProfileCard } from "@web/component/ProfileCard";
+import { EditProfileDialog } from "@web/component/EditProfileDialog";
+import { Skeleton } from "@shadcn/ui/skeleton";
 
 export function ProfileView() {
-  return <Placeholder title="My profile" />;
-}
+  const [profile, setProfile] = useState<MyProfileDTO | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-// faut que ca soit une survharge de userProfileView 
-// ou juste composant ultra reutilisable car overall ca va etre la meme chose
+  useEffect(() => {
+    API.profile.getMe().then((r) => {
+      if (r.error) return setError(String(r.data));
+      setProfile(r.data);
+    });
+  }, []);
+
+  if (error) return <p className="text-destructive text-center text-sm">{error}</p>;
+
+  if (!profile) {
+    return (
+      <div className="mx-auto w-full max-w-md">
+        <Skeleton className="h-96 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  return (
+    <ProfileCard
+      profile={profile}
+      actions={<EditProfileDialog profile={profile} onChange={setProfile} />}
+    />
+  );
+}

@@ -80,6 +80,16 @@ export class UserRepository {
     `;
   }
 
+  async markOnboarded(userId: string): Promise<UserEntity> {
+    const [user] = await this.sql<UserEntity[]>`
+      UPDATE users
+      SET onboarded = true, updated_at = now()
+      WHERE id = ${userId}
+      RETURNING *
+    `;
+    return user;
+  }
+
   async updateAccount(
     userId: string,
     input: { first_name: string; last_name: string; email: string },

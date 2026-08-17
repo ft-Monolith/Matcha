@@ -31,7 +31,7 @@ export class TransformersService {
   }
 
   userToDTO(user: UserEntity): UserDTO {
-    const { id, username, first_name, last_name, email_verified, created_at } = user;
+    const { id, username, first_name, last_name, email_verified, onboarded, created_at } = user;
 
     return {
       id,
@@ -39,6 +39,7 @@ export class TransformersService {
       firstName: first_name,
       lastName: last_name,
       emailVerified: email_verified,
+      onboarded,
       createdAt: created_at.toISOString(),
     };
   }
@@ -55,6 +56,7 @@ export class TransformersService {
       sexualPref: profile?.sexual_pref ?? "bi",
       biography: profile?.biography ?? null,
       birthdate: profile?.birthdate ? this.toISODate(profile.birthdate) : null,
+      city: profile?.city ?? null,
       tags: tags.map((t) => ({ id: t.id, name: t.name })),
       pictures: pictures.map((p) => ({
         id: p.id,
@@ -65,7 +67,13 @@ export class TransformersService {
   }
 
   myProfileToDTO(agg: ProfileAggregate): MyProfileDTO {
-    return { ...this.profileToDTO(agg), email: agg.user.email };
+    return {
+      ...this.profileToDTO(agg),
+      email: agg.user.email,
+      latitude: agg.profile?.latitude ?? null,
+      longitude: agg.profile?.longitude ?? null,
+      locationConsent: agg.profile?.location_consent ?? false,
+    };
   }
 
   private toISODate(date: Date): string {

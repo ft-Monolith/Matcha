@@ -1,23 +1,25 @@
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEmail,
   IsIn,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
   Matches,
+  Max,
   MaxLength,
+  Min,
 } from "class-validator";
 import { PREDEFINED_TAGS } from "../constant/tags";
 import { IsValidBirthdate } from "../utils/age_rules";
+import { GENDERS, SEXUAL_PREFS, type Gender, type SexualPref } from "../constant/profile";
 
-export const GENDERS = ["man", "woman", "other"] as const;
-export type Gender = (typeof GENDERS)[number];
-
-export const SEXUAL_PREFS = ["hetero", "homo", "bi"] as const;
-export type SexualPref = (typeof SEXUAL_PREFS)[number];
+export { GENDERS, SEXUAL_PREFS };
+export type { Gender, SexualPref };
 
 
 export interface TagDTO {
@@ -40,12 +42,16 @@ export interface ProfileDTO {
   sexualPref: SexualPref;
   biography: string | null;
   birthdate: string | null;
+  city: string | null; // libellé public (jamais les coordonnées exactes)
   tags: TagDTO[];
   pictures: PictureDTO[];
 }
 
 export interface MyProfileDTO extends ProfileDTO {
   email: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationConsent: boolean;
 }
 
 
@@ -93,4 +99,27 @@ export class AddPhotoDTO {
   @IsString()
   @Matches(/^data:image\/(jpeg|png|webp);base64,/, { message: "Unsupported image format" })
   data!: string;
+}
+
+export class UpdateLocationDTO {
+  @IsOptional()
+  @IsNumber({}, { message: "Invalid latitude" })
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  @IsOptional()
+  @IsNumber({}, { message: "Invalid longitude" })
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120, { message: "City name is too long" })
+  city?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  consent?: boolean;
 }

@@ -5,6 +5,7 @@ import { $user, $authReady, $use } from "@web/observables/observables";
 import { WebRoutes } from "@web/routes";
 import { AppLayout } from "@web/component/AppLayout";
 import { AuthView } from "@web/view/auth/authView";
+import { OnboardingView } from "@web/view/onboarding/OnboardingView";
 import { VerifyEmailView } from "@web/view/auth/VerifyEmailView";
 import { ResetPasswordView } from "@web/view/auth/ResetPasswordView";
 import { BrowseView } from "@web/view/browse/BrowseView";
@@ -42,7 +43,11 @@ export function App() {
         <Route path={WebRoutes.VerifyEmail} element={<VerifyEmailView />} />
         <Route path={WebRoutes.ResetPassword} element={<ResetPasswordView />} />
 
-        {user ? (
+        {!user ? (
+          <Route path="*" element={<AuthView />} />
+        ) : !user.onboarded ? (
+          <Route path="*" element={<OnboardingView />} />
+        ) : (
           <Route element={<AppLayout />}>
             <Route path={WebRoutes.Browse} element={<BrowseView />} />
             <Route path={WebRoutes.Search} element={<SearchView />} />
@@ -55,8 +60,6 @@ export function App() {
             <Route path={WebRoutes.Visits} element={<VisitsView />} />
             <Route path="*" element={<Navigate to={WebRoutes.Browse} replace />} />
           </Route>
-        ) : (
-          <Route path="*" element={<AuthView />} />
         )}
       </RouterRoutes>
     </BrowserRouter>

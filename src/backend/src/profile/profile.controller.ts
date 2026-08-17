@@ -3,6 +3,7 @@ import {
   AddPhotoDTO,
   SetTagsDTO,
   UpdateAccountDTO,
+  UpdateLocationDTO,
   UpdateProfileDTO,
 } from "@common/dto/profile.dto";
 import type { ProfileService } from "./profile.service";
@@ -21,6 +22,8 @@ export class ProfileController {
     router.patch("/account", validate(UpdateAccountDTO), this.accountHandler);
 
     router.put("/tags", validate(SetTagsDTO), this.setTagsHandler);
+    router.put("/location", validate(UpdateLocationDTO), this.locationHandler);
+    router.post("/onboarding", this.onboardingHandler);
 
     router.post("/photos", validate(AddPhotoDTO), this.addPhotoHandler);
     router.delete("/photos/:id", this.deletePhotoHandler);
@@ -45,6 +48,16 @@ export class ProfileController {
   private setTagsHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
     res.status(200).json(await this.service.setTags(userId, req.body as SetTagsDTO));
+  };
+
+  private locationHandler = async (req: Request, res: Response) => {
+    const { userId } = getSession(req);
+    res.status(200).json(await this.service.updateLocation(userId, req.body as UpdateLocationDTO));
+  };
+
+  private onboardingHandler = async (req: Request, res: Response) => {
+    const { userId } = getSession(req);
+    res.status(200).json(await this.service.completeOnboarding(userId));
   };
 
   private addPhotoHandler = async (req: Request, res: Response) => {

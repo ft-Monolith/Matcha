@@ -9,6 +9,13 @@ export interface UpsertProfileInput {
   birthdate: string | null;
 }
 
+export interface UpdateLocationInput {
+  latitude: number | null;
+  longitude: number | null;
+  city: string | null;
+  location_consent: boolean;
+}
+
 export class ProfileRepository {
   constructor(private readonly sql: Sql) {}
 
@@ -35,6 +42,27 @@ export class ProfileRepository {
         biography   = EXCLUDED.biography,
         birthdate   = EXCLUDED.birthdate,
         updated_at  = now()
+      RETURNING *
+    `;
+    return profile;
+  }
+
+  async updateLocation(userId: string, input: UpdateLocationInput): Promise<ProfileEntity> {
+    const [profile] = await this.sql<ProfileEntity[]>`
+      INSERT INTO profiles (user_id, latitude, longitude, city, location_consent)
+      VALUES (
+        ${userId},
+        ${input.latitude},
+        ${input.longitude},
+        ${input.city},
+        ${input.location_consent}
+      )
+      ON CONFLICT (user_id) DO UPDATE SET
+        latitude         = EXCLUDED.latitude,
+        longitude        = EXCLUDED.longitude,
+        city             = EXCLUDED.city,
+        location_consent = EXCLUDED.location_consent,
+        updated_at       = now()
       RETURNING *
     `;
     return profile;
