@@ -13,7 +13,6 @@ import { SearchView } from "@web/view/search/SearchView";
 import { ChatView } from "@web/view/chat/ChatView";
 import { NotificationsView } from "@web/view/notifications/NotificationsView";
 import { ProfileView } from "@web/view/profile/ProfileView";
-import { EditProfileView } from "@web/view/profile/EditProfileView";
 import { UserProfileView } from "@web/view/profile/UserProfileView";
 import { LikesView } from "@web/view/profile/LikesView";
 import { VisitsView } from "@web/view/profile/VisitsView";
@@ -54,7 +53,6 @@ export function App() {
             <Route path={WebRoutes.Chat} element={<ChatView />} />
             <Route path={WebRoutes.Notifications} element={<NotificationsView />} />
             <Route path={WebRoutes.Profile} element={<ProfileView />} />
-            <Route path={WebRoutes.EditProfile} element={<EditProfileView />} />
             <Route path={WebRoutes.User} element={<UserProfileView />} />
             <Route path={WebRoutes.Likes} element={<LikesView />} />
             <Route path={WebRoutes.Visits} element={<VisitsView />} />
