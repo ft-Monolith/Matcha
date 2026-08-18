@@ -10,6 +10,7 @@ import type { LikeRepository } from "../database/repositories/like.repository";
 import type { VisitRepository } from "../database/repositories/visit.repository";
 import type { BlockRepository } from "../database/repositories/block.repository";
 import type { ReportRepository } from "../database/repositories/report.repository";
+import type { PictureRepository } from "../database/repositories/picture.repository";
 
 export class InteractionService {
   constructor(
@@ -18,6 +19,7 @@ export class InteractionService {
     private readonly visits: VisitRepository,
     private readonly blocks: BlockRepository,
     private readonly reports: ReportRepository,
+    private readonly pictures: PictureRepository,
     private readonly transformers: TransformersService,
     private readonly presence: PresenceService,
     private readonly realtime: RealtimeService,
@@ -34,6 +36,9 @@ export class InteractionService {
     if (!target || !target.onboarded) throw new HttpError(404, "Profile not found");
     if (await this.blocks.isBlockedEither(likerId, targetId)) {
       throw new HttpError(403, "Interaction not allowed");
+    }
+    if ((await this.pictures.countByUserId(likerId)) === 0) {
+      throw new HttpError(403, "You need a profile picture to like others");
     }
 
     const inserted = await this.likes.add(likerId, targetId);

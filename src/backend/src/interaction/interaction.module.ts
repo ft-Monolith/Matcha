@@ -7,6 +7,7 @@ import { LikeRepository } from "../database/repositories/like.repository";
 import { VisitRepository } from "../database/repositories/visit.repository";
 import { BlockRepository } from "../database/repositories/block.repository";
 import { ReportRepository } from "../database/repositories/report.repository";
+import { PictureRepository } from "../database/repositories/picture.repository";
 import { InteractionService } from "./interaction.service";
 
 export interface InteractionDeps {
@@ -22,12 +23,14 @@ export function buildInteractionService(deps: InteractionDeps): InteractionServi
   const visits = new VisitRepository(deps.sql);
   const blocks = new BlockRepository(deps.sql);
   const reports = new ReportRepository(deps.sql);
+  const pictures = new PictureRepository(deps.sql);
   return new InteractionService(
     users,
     likes,
     visits,
     blocks,
     reports,
+    pictures,
     deps.transformers,
     deps.presence,
     deps.realtime,

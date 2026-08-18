@@ -29,7 +29,7 @@ function pickArea(addr: NominatimAddress | undefined): string | null {
   const city = addr.city ?? addr.town ?? addr.village ?? addr.municipality ?? addr.county;
 
   const parts = [hood, city].filter((p): p is string => Boolean(p));
-  const unique = parts.filter((p, i) => parts.indexOf(p) === i); // dédoublonne si hood == city
+  const unique = parts.filter((p, i) => parts.indexOf(p) === i);
   return unique.length > 0 ? unique.join(", ") : null;
 }
 

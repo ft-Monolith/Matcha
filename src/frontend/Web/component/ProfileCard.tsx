@@ -59,6 +59,12 @@ export function ProfileCard({ profile, actions }: ProfileCardProps) {
           {city && <p className="text-muted-foreground text-sm">📍 {city}</p>}
         </div>
 
+        {profile.likedByMe && profile.likesMe ? (
+          <Badge className="bg-green-600 text-white hover:bg-green-600">💚 Connected</Badge>
+        ) : profile.likesMe ? (
+          <Badge className="bg-pink-500 text-white hover:bg-pink-500">Likes you</Badge>
+        ) : null}
+
         <div className="flex flex-wrap justify-center gap-2">
           {gender && <Badge variant="secondary">{GENDER_LABEL[gender]}</Badge>}
           <Badge variant="secondary">{PREF_LABEL[sexualPref]}</Badge>
