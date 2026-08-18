@@ -18,6 +18,8 @@ import { UserRepository } from "./database/repositories/user.repository";
 import { ControllerHealthModule } from "./health/health.module";
 import { ControllerAuthModule } from "./auth/auth.module";
 import { ControllerProfileModule } from "./profile/profile.module";
+import { ControllerProfilesModule } from "./profile/profiles.module";
+import { ControllerMeModule } from "./interaction/me.module";
 
 
 async function main() {
@@ -37,11 +39,13 @@ async function main() {
 
   // Serveur HTTP explicite : partagé entre Express et socket.io (même port)
   const server = createServer(app);
-  const { realtime } = setupRealtime(server, new UserRepository(sql));
+  const { realtime, presence } = setupRealtime(server, new UserRepository(sql));
 
   app.use(Routes.Health, ControllerHealthModule({ sql, transformers }));
   app.use(Routes.Auth.Base, ControllerAuthModule({ sql, transformers }));
-  app.use(Routes.Profile.Base, ControllerProfileModule({ sql, transformers }));
+  app.use(Routes.Profile.Base, ControllerProfileModule({ sql, transformers, presence }));
+  app.use(Routes.Profiles.Base, ControllerProfilesModule({ sql, transformers, presence, realtime }));
+  app.use(Routes.Me.Base, ControllerMeModule({ sql, transformers, presence, realtime }));
 
   if (!isProd) {
     app.post("/api/debug/emit", authGuard, (req, res) => {

@@ -23,7 +23,7 @@ interface ProfileCardProps {
 }
 
 export function ProfileCard({ profile, actions }: ProfileCardProps) {
-  const { firstName, lastName, username, gender, sexualPref, biography, birthdate, city, tags, pictures } =
+  const { firstName, lastName, username, gender, sexualPref, biography, birthdate, city, tags, pictures, fame } =
     profile;
 
   const profilePhoto = pictures.find((p) => p.isProfile) ?? pictures[0];
@@ -38,7 +38,11 @@ export function ProfileCard({ profile, actions }: ProfileCardProps) {
             {profilePhoto && <AvatarImage src={profilePhoto.url} alt={username} />}
             <AvatarFallback className="text-2xl">{initials || "?"}</AvatarFallback>
           </Avatar>
-          <PresenceDot userId={profile.userId} className="absolute right-1 bottom-1 size-5" />
+          <PresenceDot
+            userId={profile.userId}
+            fallbackOnline={profile.online}
+            className="absolute right-1 bottom-1 size-5"
+          />
         </div>
 
         <div className="text-center">
@@ -47,13 +51,18 @@ export function ProfileCard({ profile, actions }: ProfileCardProps) {
             {birthdate && <span className="text-muted-foreground">, {ageFrom(birthdate)}</span>}
           </h1>
           <p className="text-muted-foreground text-sm">@{username}</p>
-          <PresenceText userId={profile.userId} />
+          <PresenceText
+            userId={profile.userId}
+            fallbackOnline={profile.online}
+            fallbackLastSeen={profile.lastSeen}
+          />
           {city && <p className="text-muted-foreground text-sm">📍 {city}</p>}
         </div>
 
         <div className="flex flex-wrap justify-center gap-2">
           {gender && <Badge variant="secondary">{GENDER_LABEL[gender]}</Badge>}
           <Badge variant="secondary">{PREF_LABEL[sexualPref]}</Badge>
+          <Badge variant="secondary">⭐ Fame {fame}</Badge>
         </div>
 
         {biography && (

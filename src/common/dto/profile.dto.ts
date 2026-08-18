@@ -42,9 +42,23 @@ export interface ProfileDTO {
   sexualPref: SexualPref;
   biography: string | null;
   birthdate: string | null;
-  city: string | null; // libellé public (jamais les coordonnées exactes)
+  city: string | null;
   tags: TagDTO[];
   pictures: PictureDTO[];
+  online: boolean;
+  lastSeen: string | null;
+  likedByMe: boolean;
+  likesMe: boolean;
+  fame: number;
+}
+
+export interface ProfilePreviewDTO {
+  userId: string;
+  firstName: string;
+  age: number | null;
+  photo: string | null;
+  online: boolean;
+  fame: number;
 }
 
 export interface MyProfileDTO extends ProfileDTO {

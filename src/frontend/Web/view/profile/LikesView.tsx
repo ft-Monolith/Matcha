@@ -1,6 +1,11 @@
-import { Placeholder } from "@web/component/Placeholder";
+import { API } from "@web/API/api";
+import { ProfileList } from "@web/component/ProfileList";
 
 export function LikesView() {
-  return <Placeholder title="Who liked me" />;
+  return (
+    <ProfileList
+      fetchPage={(limit, offset) => API.me.likers(limit, offset)}
+      emptyMessage="No one liked you yet."
+    />
+  );
 }
-// a voir si on met une dialog ou une popover 

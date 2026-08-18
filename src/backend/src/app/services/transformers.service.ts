@@ -1,10 +1,12 @@
 import type { HealthDTO } from "@common/dto/health.dto";
 import type { UserDTO } from "@common/dto/user.dto";
-import type { MyProfileDTO, ProfileDTO } from "@common/dto/profile.dto";
+import type { MyProfileDTO, ProfileDTO, ProfilePreviewDTO } from "@common/dto/profile.dto";
+import { computeFame } from "@common/constant/fame";
 import type { UserEntity } from "../../database/entities/user.entity";
 import type { ProfileEntity } from "../../database/entities/profile.entity";
 import type { TagEntity } from "../../database/entities/tag.entity";
 import type { PictureEntity } from "../../database/entities/picture.entity";
+import type { ProfilePreviewRow } from "../../database/repositories/profile.repository";
 
 
 export interface HealthSnapshot {
@@ -44,7 +46,13 @@ export class TransformersService {
     };
   }
 
-  profileToDTO(agg: ProfileAggregate): ProfileDTO {
+  profileToDTO(
+    agg: ProfileAggregate,
+    online: boolean,
+    likedByMe = false,
+    likesMe = false,
+    fame = 0,
+  ): ProfileDTO {
     const { user, profile, tags, pictures } = agg;
 
     return {
@@ -63,12 +71,17 @@ export class TransformersService {
         url: `/uploads/${p.filename}`,
         isProfile: p.is_profile,
       })),
+      online,
+      lastSeen: user.last_seen ? user.last_seen.toISOString() : null,
+      likedByMe,
+      likesMe,
+      fame,
     };
   }
 
-  myProfileToDTO(agg: ProfileAggregate): MyProfileDTO {
+  myProfileToDTO(agg: ProfileAggregate, online: boolean, fame = 0): MyProfileDTO {
     return {
-      ...this.profileToDTO(agg),
+      ...this.profileToDTO(agg, online, false, false, fame),
       email: agg.user.email,
       latitude: agg.profile?.latitude ?? null,
       longitude: agg.profile?.longitude ?? null,
@@ -76,7 +89,26 @@ export class TransformersService {
     };
   }
 
+  profilePreviewToDTO(row: ProfilePreviewRow, online: boolean): ProfilePreviewDTO {
+    return {
+      userId: row.user_id,
+      firstName: row.first_name,
+      age: row.birthdate ? this.ageFrom(row.birthdate) : null,
+      photo: row.photo ? `/uploads/${row.photo}` : null,
+      online,
+      fame: computeFame(row.likes_count, row.visits_count),
+    };
+  }
+
   private toISODate(date: Date): string {
     return date.toISOString().slice(0, 10);
+  }
+
+  private ageFrom(birthdate: Date): number {
+    const now = new Date();
+    let age = now.getFullYear() - birthdate.getFullYear();
+    const m = now.getMonth() - birthdate.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < birthdate.getDate())) age--;
+    return age;
   }
 }

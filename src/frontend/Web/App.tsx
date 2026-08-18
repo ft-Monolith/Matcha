@@ -18,6 +18,7 @@ import { ProfileView } from "@web/view/profile/ProfileView";
 import { UserProfileView } from "@web/view/profile/UserProfileView";
 import { LikesView } from "@web/view/profile/LikesView";
 import { VisitsView } from "@web/view/profile/VisitsView";
+import { BlockedView } from "@web/view/profile/BlockedView";
 
 export function App() {
   const authReady = $use($authReady);
@@ -87,6 +88,7 @@ export function App() {
             <Route path={WebRoutes.User} element={<UserProfileView />} />
             <Route path={WebRoutes.Likes} element={<LikesView />} />
             <Route path={WebRoutes.Visits} element={<VisitsView />} />
+            <Route path={WebRoutes.Blocked} element={<BlockedView />} />
             <Route path="*" element={<Navigate to={WebRoutes.Browse} replace />} />
           </Route>
         )}

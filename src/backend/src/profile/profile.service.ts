@@ -4,11 +4,14 @@ import { join } from "node:path";
 import type {
   AddPhotoDTO,
   MyProfileDTO,
+  ProfileDTO,
+  ProfilePreviewDTO,
   SetTagsDTO,
   UpdateAccountDTO,
   UpdateLocationDTO,
   UpdateProfileDTO,
 } from "@common/dto/profile.dto";
+import type { Paginated } from "@common/dto/pagination.dto";
 import type { UserDTO } from "@common/dto/user.dto";
 import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
@@ -17,6 +20,10 @@ import type { UserRepository } from "../database/repositories/user.repository";
 import type { ProfileRepository } from "../database/repositories/profile.repository";
 import type { TagRepository } from "../database/repositories/tag.repository";
 import type { PictureRepository } from "../database/repositories/picture.repository";
+import type { LikeRepository } from "../database/repositories/like.repository";
+import type { VisitRepository } from "../database/repositories/visit.repository";
+import { computeFame } from "@common/constant/fame";
+import type { PresenceService } from "../app/realtime/presence.service";
 
 const MAX_PHOTOS = 5;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5 Mo
@@ -32,20 +39,66 @@ export class ProfileService {
     private readonly profiles: ProfileRepository,
     private readonly tags: TagRepository,
     private readonly pictures: PictureRepository,
+    private readonly likes: LikeRepository,
+    private readonly visits: VisitRepository,
     private readonly transformers: TransformersService,
+    private readonly presence: PresenceService,
   ) {}
 
   async getMe(userId: string): Promise<MyProfileDTO> {
     const user = await this.users.findById(userId);
     if (!user) throw new HttpError(404, "User not found");
 
-    const [profile, tags, pictures] = await Promise.all([
+    const [profile, tags, pictures, likesReceived, visitsReceived] = await Promise.all([
       this.profiles.findByUserId(userId),
       this.tags.findByUserId(userId),
       this.pictures.findByUserId(userId),
+      this.likes.countReceived(userId),
+      this.visits.countReceived(userId),
     ]);
 
-    return this.transformers.myProfileToDTO({ user, profile, tags, pictures });
+    return this.transformers.myProfileToDTO(
+      { user, profile, tags, pictures },
+      this.presence.isOnline(userId),
+      computeFame(likesReceived, visitsReceived),
+    );
+  }
+
+  async listOthers(viewerId: string, limit: number, offset: number): Promise<Paginated<ProfilePreviewDTO>> {
+    const [rows, totalCount] = await Promise.all([
+      this.profiles.listOthers(viewerId, limit, offset),
+      this.profiles.countOthers(viewerId),
+    ]);
+
+    const items = rows.map((r) =>
+      this.transformers.profilePreviewToDTO(r, this.presence.isOnline(r.user_id)),
+    );
+
+    return { items, totalCount, hasNextPage: offset + rows.length < totalCount };
+  }
+
+  async getPublicProfile(viewerId: string, targetId: string): Promise<ProfileDTO> {
+    const user = await this.users.findById(targetId);
+    if (!user || !user.onboarded) throw new HttpError(404, "Profile not found");
+
+    const [profile, tags, pictures, likedByMe, likesMe, likesReceived, visitsReceived] =
+      await Promise.all([
+        this.profiles.findByUserId(targetId),
+        this.tags.findByUserId(targetId),
+        this.pictures.findByUserId(targetId),
+        this.likes.exists(viewerId, targetId),
+        this.likes.exists(targetId, viewerId),
+        this.likes.countReceived(targetId),
+        this.visits.countReceived(targetId),
+      ]);
+
+    return this.transformers.profileToDTO(
+      { user, profile, tags, pictures },
+      this.presence.isOnline(targetId),
+      likedByMe,
+      likesMe,
+      computeFame(likesReceived, visitsReceived),
+    );
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDTO): Promise<MyProfileDTO> {

@@ -1,5 +1,11 @@
-import { Placeholder } from "@web/component/Placeholder";
+import { API } from "@web/API/api";
+import { ProfileList } from "@web/component/ProfileList";
 
 export function VisitsView() {
-  return <Placeholder title="Profile visits" />;
+  return (
+    <ProfileList
+      fetchPage={(limit, offset) => API.me.visits(limit, offset)}
+      emptyMessage="No one viewed your profile yet."
+    />
+  );
 }

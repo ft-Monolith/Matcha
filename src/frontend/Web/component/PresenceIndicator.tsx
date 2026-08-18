@@ -6,9 +6,17 @@ export function usePresence(userId: string) {
   return all[userId];
 }
 
-export function PresenceDot({ userId, className }: { userId: string; className?: string }) {
+export function PresenceDot({
+  userId,
+  fallbackOnline,
+  className,
+}: {
+  userId: string;
+  fallbackOnline?: boolean;
+  className?: string;
+}) {
   const presence = usePresence(userId);
-  const online = presence?.online ?? false;
+  const online = presence?.online ?? fallbackOnline ?? false;
   return (
     <span
       className={cn(
@@ -21,15 +29,26 @@ export function PresenceDot({ userId, className }: { userId: string; className?:
   );
 }
 
-export function PresenceText({ userId }: { userId: string }) {
+export function PresenceText({
+  userId,
+  fallbackOnline,
+  fallbackLastSeen,
+}: {
+  userId: string;
+  fallbackOnline?: boolean;
+  fallbackLastSeen?: string | null;
+}) {
   const presence = usePresence(userId);
-  if (presence?.online) {
+  const online = presence?.online ?? fallbackOnline ?? false;
+  const lastSeen = presence?.lastSeen ?? fallbackLastSeen ?? null;
+
+  if (online) {
     return <span className="text-sm font-medium text-green-600">Online</span>;
   }
-  if (presence?.lastSeen) {
+  if (lastSeen) {
     return (
       <span className="text-muted-foreground text-sm">
-        Last seen {new Date(presence.lastSeen).toLocaleString()}
+        Last seen {new Date(lastSeen).toLocaleString()}
       </span>
     );
   }

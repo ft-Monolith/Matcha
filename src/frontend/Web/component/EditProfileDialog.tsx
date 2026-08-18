@@ -141,6 +141,9 @@ export function EditProfileDialog({
       <Button variant="outline" onClick={() => navigate(WebRoutes.Likes)}>
         Who like my profile?
       </Button>
+      <Button variant="outline" onClick={() => navigate(WebRoutes.Blocked)}>
+        Blocked users
+      </Button>
       <Dialog
         open={open}
         onOpenChange={(o) => {

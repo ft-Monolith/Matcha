@@ -27,4 +27,20 @@ export const Routes = {
     Photo: "/api/profile/photos/:id",
     PhotoProfile: "/api/profile/photos/:id/profile",
   },
+
+  Profiles: {
+    Base: "/api/profiles",
+    List: "/api/profiles",
+    ById: "/api/profiles/:id",
+    Like: "/api/profiles/:id/like",
+    Block: "/api/profiles/:id/block",
+    Report: "/api/profiles/:id/report",
+  },
+
+  Me: {
+    Base: "/api/me",
+    Likers: "/api/me/likers",
+    Visits: "/api/me/visits",
+    Blocks: "/api/me/blocks",
+  },
 } as const;

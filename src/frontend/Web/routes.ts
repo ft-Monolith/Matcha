@@ -8,6 +8,7 @@ export const WebRoutes = {
   EditProfile: "/profile/edit",
   Likes: "/likes",
   Visits: "/visits",
+  Blocked: "/blocked",
   User: "/users/:id",
 
   VerifyEmail: "/verify-email",
