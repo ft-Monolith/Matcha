@@ -1,0 +1,14 @@
+import { io, type Socket } from "socket.io-client";
+
+export const socket: Socket = io({
+  autoConnect: false,
+  withCredentials: true,
+});
+
+export function connectSocket(): void {
+  if (!socket.connected) socket.connect();
+}
+
+export function disconnectSocket(): void {
+  if (socket.connected) socket.disconnect();
+}

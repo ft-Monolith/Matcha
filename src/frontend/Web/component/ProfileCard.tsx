@@ -5,6 +5,7 @@ import { Badge } from "@shadcn/ui/badge";
 import { Card, CardContent } from "@shadcn/ui/card";
 import { Separator } from "@shadcn/ui/separator";
 import { GENDER_LABEL, PREF_LABEL } from "@web/component/fields/labels";
+import { PresenceDot, PresenceText } from "@web/component/PresenceIndicator";
 
 function ageFrom(birthdate: string): number {
   const birth = new Date(birthdate);
@@ -32,10 +33,13 @@ export function ProfileCard({ profile, actions }: ProfileCardProps) {
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardContent className="flex flex-col items-center gap-4 pt-6">
-        <Avatar className="size-28">
-          {profilePhoto && <AvatarImage src={profilePhoto.url} alt={username} />}
-          <AvatarFallback className="text-2xl">{initials || "?"}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="size-28">
+            {profilePhoto && <AvatarImage src={profilePhoto.url} alt={username} />}
+            <AvatarFallback className="text-2xl">{initials || "?"}</AvatarFallback>
+          </Avatar>
+          <PresenceDot userId={profile.userId} className="absolute right-1 bottom-1 size-5" />
+        </div>
 
         <div className="text-center">
           <h1 className="text-xl font-semibold">
@@ -43,6 +47,7 @@ export function ProfileCard({ profile, actions }: ProfileCardProps) {
             {birthdate && <span className="text-muted-foreground">, {ageFrom(birthdate)}</span>}
           </h1>
           <p className="text-muted-foreground text-sm">@{username}</p>
+          <PresenceText userId={profile.userId} />
           {city && <p className="text-muted-foreground text-sm">📍 {city}</p>}
         </div>
 

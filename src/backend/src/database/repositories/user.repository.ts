@@ -72,6 +72,16 @@ export class UserRepository {
     return user ?? null;
   }
 
+  async touchLastSeen(userId: string): Promise<Date | null> {
+    const [row] = await this.sql<{ last_seen: Date | null }[]>`
+      UPDATE users
+      SET last_seen = now()
+      WHERE id = ${userId}
+      RETURNING last_seen
+    `;
+    return row?.last_seen ?? null;
+  }
+
   async updatePassword(userId: string, passwordHash: string): Promise<void> {
     await this.sql`
       UPDATE users

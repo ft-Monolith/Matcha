@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
+import { toast } from "sonner";
 import { API } from "@web/API/api";
-import { $user, $authReady, $use } from "@web/observables/observables";
+import { $user, $authReady, $presence, $use, type Presence } from "@web/observables/observables";
+import { socket, connectSocket, disconnectSocket } from "@web/realtime/socket";
 import { WebRoutes } from "@web/routes";
 import { AppLayout } from "@web/component/AppLayout";
 import { AuthView } from "@web/view/auth/authView";
@@ -30,6 +32,35 @@ export function App() {
 
   useEffect(() => {
     isConnected();
+  }, []);
+
+  const isAuthed = !!user;
+  useEffect(() => {
+    if (!isAuthed) return;
+    connectSocket();
+    return () => disconnectSocket();
+  }, [isAuthed]);
+
+  useEffect(() => {
+    const onPresence = (p: { userId: string } & Presence) => {
+      $presence[p.userId].set({ online: p.online, lastSeen: p.lastSeen });
+    };
+    socket.on("presence", onPresence);
+    return () => {
+      socket.off("presence", onPresence);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const onTest = (payload: unknown) => {
+      console.log("[ws] test event", payload);
+      toast("WS test event received");
+    };
+    socket.on("test", onTest);
+    return () => {
+      socket.off("test", onTest);
+    };
   }, []);
 
   if (!authReady) {
