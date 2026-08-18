@@ -11,11 +11,9 @@ import { Button } from "@shadcn/ui/button";
 import { Skeleton } from "@shadcn/ui/skeleton";
 
 interface ProfileDialogProps {
-  userId: string | null; // id du profil à afficher ; null = fermé
+  userId: string | null;
   onClose: () => void;
-  // Retire le profil de la liste appelante après un block (disparition immédiate)
   onBlocked?: (userId: string) => void;
-  // actions contextuelles supplémentaires
   actions?: (profile: ProfileDTO) => ReactNode;
 }
 

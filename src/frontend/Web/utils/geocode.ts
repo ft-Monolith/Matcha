@@ -1,7 +1,6 @@
 const NOMINATIM = "https://nominatim.openstreetmap.org";
 
 interface NominatimAddress {
-  // Champs "quartier" (du plus fin au moins fin) ; hamlet/residential couvrent les petites communes
   neighbourhood?: string;
   quarter?: string;
   suburb?: string;
@@ -9,7 +8,6 @@ interface NominatimAddress {
   borough?: string;
   residential?: string;
   hamlet?: string;
-  // Champs "ville"
   city?: string;
   town?: string;
   village?: string;
@@ -18,7 +16,6 @@ interface NominatimAddress {
   country?: string;
 }
 
-// Construit un libellé jusqu'au quartier : "Quartier, Ville" (ou juste la ville si pas de quartier)
 function pickArea(addr: NominatimAddress | undefined): string | null {
   if (!addr) return null;
   const hood =
@@ -38,7 +35,6 @@ function pickArea(addr: NominatimAddress | undefined): string | null {
 
 export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
   try {
-    // zoom=16 -> niveau quartier/rue (14 restait au niveau district/ville)
     const res = await fetch(
       `${NOMINATIM}/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`,
     );

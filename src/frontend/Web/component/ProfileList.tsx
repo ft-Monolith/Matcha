@@ -11,12 +11,10 @@ import { Skeleton } from "@shadcn/ui/skeleton";
 const PAGE_SIZE = 20;
 
 interface ProfileListProps {
-  // Charge une page ; réutilisé par Search (/profiles), Likes (/me/likers), Visits…
   fetchPage: (limit: number, offset: number) => Promise<APIResponse<Paginated<ProfilePreviewDTO>>>;
   emptyMessage?: string;
 }
 
-// Grille paginée de cartes compactes + infinite scroll + dialog de consultation
 export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
   const [items, setItems] = useState<ProfilePreviewDTO[]>([]);
   const [hasNext, setHasNext] = useState(false);
@@ -26,7 +24,6 @@ export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
   const inFlightRef = useRef(false);
 
   const loadPage = useCallback(async () => {
-    // Garde anti-concurrence : évite qu'un 2e appel (StrictMode / scroll) recharge la même page
     if (inFlightRef.current) return;
     inFlightRef.current = true;
     try {
