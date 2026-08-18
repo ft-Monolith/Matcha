@@ -1,6 +1,6 @@
-/**
- * Wrapper fetch 
-**/
+
+
+import { Routes } from "@common/routes/routes";
 
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -52,6 +52,19 @@ async function getBody(res: Response): Promise<unknown> {
   return isJson ? await res.json().catch(() => null) : await res.text();
 }
 
+
+let refreshInFlight: Promise<boolean> | null = null;
+
+function tryRefresh(): Promise<boolean> {
+  refreshInFlight ??= fetch(Routes.Auth.Refresh, { method: "POST", credentials: "include" })
+    .then((res) => res.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+  return refreshInFlight;
+}
+
 export async function fetchAPI<T>(
   method: Method,
   endpoint: string,
@@ -70,9 +83,19 @@ export async function fetchAPI<T>(
       signal: args.abort?.signal,
     });
 
-    const body = await getBody(res);
 
-    // TODO(auth) : sur 401, tenter API.auth.refresh() puis rejouer la requête
+    if (
+      res.status === 401 &&
+      !args.retrying &&
+      endpoint !== Routes.Auth.Refresh &&
+      endpoint !== Routes.Auth.Login
+    ) {
+      if (await tryRefresh()) {
+        return fetchAPI<T>(method, endpoint, { ...args, retrying: true });
+      }
+    }
+
+    const body = await getBody(res);
 
     if (!res.ok) {
       const message =

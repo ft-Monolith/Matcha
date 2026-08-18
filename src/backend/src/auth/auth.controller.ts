@@ -5,24 +5,29 @@ import { ForgotPasswordDTO, ResetPasswordDTO } from "@common/dto/reset-password.
 import type { AuthService } from "./auth.service";
 import { validate } from "../app/middlewares/validate";
 import { authGuard } from "../app/middlewares/authGuard";
+import { rateLimit } from "../app/middlewares/rateLimit";
 import { getSession } from "../app/session";
 import { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } from "../app/cookies";
 import { verifyRefreshToken } from "../app/jwt";
 import { HttpError } from "../app/http-error";
 
 
+const loginLimiter = rateLimit({ windowMs: 5 * 60 * 1000, max: 10, message: "Too many login attempts, please try again in a few minutes" });
+const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10 });
+const emailLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, message: "Too many requests, please try again later" });
+
 export class AuthController {
   constructor(private readonly service: AuthService) {}
 
   register(router: Router) {
-    router.post("/register", validate(RegisterDTO), this.registerHandler);
+    router.post("/register", registerLimiter, validate(RegisterDTO), this.registerHandler);
     router.post("/verify", validate(VerifyEmailDTO), this.verifyHandler);
-    router.post("/login", validate(LoginDTO), this.loginHandler);
+    router.post("/login", loginLimiter, validate(LoginDTO), this.loginHandler);
     router.post("/refresh", this.refreshHandler);
     router.post("/logout", this.logoutHandler);
     router.get("/me", authGuard, this.meHandler);
-    router.post("/forgot-password", validate(ForgotPasswordDTO), this.forgotPasswordHandler);
-    router.post("/reset-password", validate(ResetPasswordDTO), this.resetPasswordHandler);
+    router.post("/forgot-password", emailLimiter, validate(ForgotPasswordDTO), this.forgotPasswordHandler);
+    router.post("/reset-password", loginLimiter, validate(ResetPasswordDTO), this.resetPasswordHandler);
   }
 
   private registerHandler = async (req: Request, res: Response) => {

@@ -34,6 +34,8 @@ async function main() {
 
   const app = express();
 
+  app.set("trust proxy", 1);
+
   app.use(helmet()); // en-têtes de sécurité
   app.use(cors({ origin: env.appUrl, credentials: true })); // credentials → cookies de session
   app.use(cookieParser()); // parse les cookies httpOnly (auth, plus tard)
