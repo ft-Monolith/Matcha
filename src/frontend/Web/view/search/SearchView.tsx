@@ -110,6 +110,7 @@ export function SearchView() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="suggestion">Relevance</SelectItem>
                 <SelectItem value="fame">Fame</SelectItem>
                 <SelectItem value="distance">Distance</SelectItem>
                 <SelectItem value="age">Age</SelectItem>

@@ -82,7 +82,7 @@ export class ProfileService {
       fameMax: params.fameMax ?? null,
       maxDistance: params.maxDistance ?? null,
       tags: params.tags && params.tags.length > 0 ? params.tags : null,
-      sort: params.sort ?? "fame",
+      sort: params.sort ?? "suggestion",
       order: params.order ?? "desc",
       limit,
       offset,

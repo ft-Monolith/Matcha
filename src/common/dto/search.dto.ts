@@ -1,4 +1,4 @@
-export type SortField = "age" | "fame" | "distance" | "tags";
+export type SortField = "suggestion" | "age" | "fame" | "distance" | "tags";
 export type SortOrder = "asc" | "desc";
 
 export interface SearchParams {

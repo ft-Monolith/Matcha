@@ -21,7 +21,7 @@ export interface SearchInput {
   offset: number;
 }
 
-const SORT_COLUMNS: Record<SortField, string> = {
+const SORT_COLUMNS: Record<Exclude<SortField, "suggestion">, string> = {
   age: "age_years",
   fame: "fame",
   distance: "distance_km",
@@ -85,7 +85,20 @@ export class ProfileRepository {
 
   async search(input: SearchInput): Promise<{ rows: ProfilePreviewRow[]; total: number }> {
     const dir = input.order === "asc" ? this.sql`ASC` : this.sql`DESC`;
-    const col = SORT_COLUMNS[input.sort] ?? "fame";
+
+    const orderBy =
+      input.sort === "suggestion"
+        ? this.sql`
+            (CASE
+               WHEN distance_km IS NULL THEN 5
+               WHEN distance_km < 5   THEN 0
+               WHEN distance_km < 20  THEN 1
+               WHEN distance_km < 50  THEN 2
+               WHEN distance_km < 100 THEN 3
+               ELSE 4
+             END) ASC,
+            common_tags DESC, fame DESC, user_id`
+        : this.sql`${this.sql(SORT_COLUMNS[input.sort])} ${dir} NULLS LAST, user_id`;
 
     const rows = await this.sql<(ProfilePreviewRow & { total_count: number })[]>`
       WITH base AS (
@@ -154,7 +167,7 @@ export class ProfileRepository {
         AND (${input.fameMax}::int  IS NULL OR fame <= ${input.fameMax})
         AND (${input.maxDistance}::float8 IS NULL
              OR (distance_km IS NOT NULL AND distance_km <= ${input.maxDistance}))
-      ORDER BY ${this.sql(col)} ${dir} NULLS LAST, user_id
+      ORDER BY ${orderBy}
       LIMIT ${input.limit} OFFSET ${input.offset}
     `;
 

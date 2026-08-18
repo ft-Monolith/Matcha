@@ -7,7 +7,7 @@ import { getSession } from "../app/session";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
-const SORT_FIELDS: SortField[] = ["age", "fame", "distance", "tags"];
+const SORT_FIELDS: SortField[] = ["suggestion", "age", "fame", "distance", "tags"];
 
 function clampInt(value: unknown, def: number, min: number, max: number): number {
   const n = Number(value);
