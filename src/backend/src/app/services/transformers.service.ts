@@ -97,6 +97,7 @@ export class TransformersService {
       photo: row.photo ? `/uploads/${row.photo}` : null,
       online,
       fame: computeFame(row.likes_count, row.visits_count),
+      distance: row.distance_km == null ? null : Math.round(row.distance_km * 10) / 10,
     };
   }
 

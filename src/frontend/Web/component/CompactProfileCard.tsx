@@ -9,7 +9,7 @@ interface CompactProfileCardProps {
 }
 
 export function CompactProfileCard({ profile, onClick }: CompactProfileCardProps) {
-  const { firstName, age, photo, userId, online, fame } = profile;
+  const { firstName, age, photo, userId, online, fame, distance } = profile;
   const initials = firstName[0]?.toUpperCase() ?? "?";
 
   return (
@@ -32,7 +32,10 @@ export function CompactProfileCard({ profile, onClick }: CompactProfileCardProps
         {firstName}
         {age !== null && <span className="text-muted-foreground">, {age}</span>}
       </p>
-      <p className="text-muted-foreground text-xs">⭐ {fame}</p>
+      <p className="text-muted-foreground text-xs">
+        ⭐ {fame}
+        {distance !== null && <span> · 📍 {distance} km</span>}
+      </p>
     </Card>
   );
 }

@@ -12,6 +12,7 @@ import type {
   UpdateProfileDTO,
 } from "@common/dto/profile.dto";
 import type { Paginated } from "@common/dto/pagination.dto";
+import type { SearchParams } from "@common/dto/search.dto";
 import type { UserDTO } from "@common/dto/user.dto";
 import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
@@ -64,17 +65,34 @@ export class ProfileService {
     );
   }
 
-  async listOthers(viewerId: string, limit: number, offset: number): Promise<Paginated<ProfilePreviewDTO>> {
-    const [rows, totalCount] = await Promise.all([
-      this.profiles.listOthers(viewerId, limit, offset),
-      this.profiles.countOthers(viewerId),
-    ]);
+  async search(viewerId: string, params: SearchParams): Promise<Paginated<ProfilePreviewDTO>> {
+    const viewer = await this.profiles.findByUserId(viewerId);
+    const limit = Math.min(Math.max(params.limit ?? 20, 1), 50);
+    const offset = Math.max(params.offset ?? 0, 0);
+
+    const { rows, total } = await this.profiles.search({
+      viewerId,
+      gender: viewer?.gender ?? null,
+      pref: viewer?.sexual_pref ?? "bi",
+      lat: viewer?.latitude ?? null,
+      lng: viewer?.longitude ?? null,
+      ageMin: params.ageMin ?? null,
+      ageMax: params.ageMax ?? null,
+      fameMin: params.fameMin ?? null,
+      fameMax: params.fameMax ?? null,
+      maxDistance: params.maxDistance ?? null,
+      tags: params.tags && params.tags.length > 0 ? params.tags : null,
+      sort: params.sort ?? "fame",
+      order: params.order ?? "desc",
+      limit,
+      offset,
+    });
 
     const items = rows.map((r) =>
       this.transformers.profilePreviewToDTO(r, this.presence.isOnline(r.user_id)),
     );
 
-    return { items, totalCount, hasNextPage: offset + rows.length < totalCount };
+    return { items, totalCount: total, hasNextPage: offset + rows.length < total };
   }
 
   async getPublicProfile(viewerId: string, targetId: string): Promise<ProfileDTO> {

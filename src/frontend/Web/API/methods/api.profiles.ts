@@ -1,14 +1,16 @@
 import type { ProfileDTO, ProfilePreviewDTO } from "@common/dto/profile.dto";
 import type { InteractionStateDTO } from "@common/dto/interaction.dto";
 import type { Paginated } from "@common/dto/pagination.dto";
+import type { SearchParams } from "@common/dto/search.dto";
 import { Routes } from "@common/routes/routes";
 import type { APIResponse } from "../fetchAPI";
 import { IAPI } from "../interface";
 
 export class APIProfiles extends IAPI {
-  list(limit: number, offset: number): Promise<APIResponse<Paginated<ProfilePreviewDTO>>> {
+  search(params: SearchParams): Promise<APIResponse<Paginated<ProfilePreviewDTO>>> {
+    const { tags, ...rest } = params;
     return this.fetch<Paginated<ProfilePreviewDTO>>("GET", Routes.Profiles.List, {
-      query: { limit, offset },
+      query: { ...rest, tags: tags && tags.length > 0 ? tags.join(",") : undefined },
     });
   }
 

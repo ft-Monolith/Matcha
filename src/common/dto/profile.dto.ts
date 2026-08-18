@@ -59,6 +59,7 @@ export interface ProfilePreviewDTO {
   photo: string | null;
   online: boolean;
   fame: number;
+  distance: number | null;
 }
 
 export interface MyProfileDTO extends ProfileDTO {

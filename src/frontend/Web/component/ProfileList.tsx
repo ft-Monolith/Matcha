@@ -38,6 +38,10 @@ export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
   }, [fetchPage]);
 
   useEffect(() => {
+    setItems([]);
+    setHasNext(false);
+    offsetRef.current = 0;
+    setInitialLoading(true);
     loadingWrapper(setInitialLoading, loadPage);
   }, [loadPage]);
 
