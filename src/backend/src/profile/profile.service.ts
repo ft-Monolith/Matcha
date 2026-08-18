@@ -16,6 +16,7 @@ import type { SearchParams } from "@common/dto/search.dto";
 import type { UserDTO } from "@common/dto/user.dto";
 import { env } from "../app/config/env";
 import { HttpError } from "../app/http-error";
+import { detectImageMime } from "../app/image";
 import type { TransformersService } from "../app/services/transformers.service";
 import type { UserRepository } from "../database/repositories/user.repository";
 import type { ProfileRepository } from "../database/repositories/profile.repository";
@@ -177,7 +178,8 @@ export class ProfileService {
     if (!profile?.gender) missing.push("gender");
     if (!profile?.birthdate) missing.push("birthdate");
     if (!profile?.biography || profile.biography.trim() === "") missing.push("biography");
-    if (!profile?.city) missing.push("location");
+    if (!profile?.city || profile?.latitude == null || profile?.longitude == null)
+      missing.push("location");
     if (tags.length === 0) missing.push("at least one tag");
     if (pictures.length === 0) missing.push("at least one photo");
 
@@ -206,6 +208,11 @@ export class ProfileService {
     const buffer = Buffer.from(payload, "base64");
     if (buffer.length === 0) throw new HttpError(400, "Empty image");
     if (buffer.length > MAX_PHOTO_BYTES) throw new HttpError(400, "Image too large (max 5MB)");
+
+    const realMime = detectImageMime(buffer);
+    if (realMime === null || realMime !== mime) {
+      throw new HttpError(400, "Invalid image content");
+    }
 
     const filename = `${randomUUID()}.${MIME_TO_EXT[mime]}`;
     await writeFile(join(env.uploadsDir, filename), buffer);

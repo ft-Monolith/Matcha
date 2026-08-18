@@ -3,6 +3,8 @@ import { APIAuth } from "./methods/api.auth";
 import { APIProfile } from "./methods/api.profile";
 import { APIProfiles } from "./methods/api.profiles";
 import { APIMe } from "./methods/api.me";
+import { APIChat } from "./methods/api.chat";
+import { APINotifications } from "./methods/api.notifications";
 
 
 class ApiRoot {
@@ -11,6 +13,8 @@ class ApiRoot {
   readonly profile = new APIProfile();
   readonly profiles = new APIProfiles();
   readonly me = new APIMe();
+  readonly chat = new APIChat();
+  readonly notifications = new APINotifications();
 
 
 }

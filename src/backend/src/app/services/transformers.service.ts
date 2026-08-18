@@ -1,6 +1,13 @@
 import type { HealthDTO } from "@common/dto/health.dto";
 import type { UserDTO } from "@common/dto/user.dto";
 import type { MyProfileDTO, ProfileDTO, ProfilePreviewDTO } from "@common/dto/profile.dto";
+import type { ConversationDTO, MessageDTO } from "@common/dto/chat.dto";
+import type { NotificationDTO } from "@common/dto/notification.dto";
+import type {
+  ConversationRow,
+  MessageRow,
+} from "../../database/repositories/message.repository";
+import type { NotificationRow } from "../../database/repositories/notification.repository";
 import { computeFame } from "@common/constant/fame";
 import type { UserEntity } from "../../database/entities/user.entity";
 import type { ProfileEntity } from "../../database/entities/profile.entity";
@@ -98,6 +105,46 @@ export class TransformersService {
       online,
       fame: computeFame(row.likes_count, row.visits_count),
       distance: row.distance_km == null ? null : Math.round(row.distance_km * 10) / 10,
+    };
+  }
+
+  messageToDTO(row: MessageRow): MessageDTO {
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      content: row.content,
+      createdAt: row.created_at.toISOString(),
+      read: row.read_at !== null,
+    };
+  }
+
+  conversationToDTO(row: ConversationRow, online: boolean): ConversationDTO {
+    return {
+      user: this.profilePreviewToDTO(row, online),
+      lastMessage: row.last_id
+        ? {
+            id: row.last_id,
+            senderId: row.last_sender_id!,
+            content: row.last_content!,
+            createdAt: row.last_created_at!.toISOString(),
+            read: row.last_read_at !== null,
+          }
+        : null,
+      unread: row.unread,
+    };
+  }
+
+  notificationToDTO(row: NotificationRow): NotificationDTO {
+    return {
+      id: row.id,
+      type: row.type,
+      actor: {
+        userId: row.actor_id,
+        firstName: row.actor_first_name,
+        photo: row.actor_photo ? `/uploads/${row.actor_photo}` : null,
+      },
+      read: row.read_at !== null,
+      createdAt: row.created_at.toISOString(),
     };
   }
 

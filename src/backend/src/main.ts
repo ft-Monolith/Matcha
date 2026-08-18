@@ -5,13 +5,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { Routes } from "@common/routes/routes";
 
-import { env, isProd } from "./app/config/env";
+import { env } from "./app/config/env";
 import { createSqlClient } from "./database/client";
 import { runMigrations } from "./database/migrator";
 import { seedTags } from "./database/seed";
 import { errorMiddleware, notFoundMiddleware } from "./app/middlewares/error";
-import { authGuard } from "./app/middlewares/authGuard";
-import { getSession } from "./app/session";
 import { TransformersService } from "./app/services/transformers.service";
 import { setupRealtime } from "./app/realtime/setup";
 import { UserRepository } from "./database/repositories/user.repository";
@@ -20,6 +18,10 @@ import { ControllerAuthModule } from "./auth/auth.module";
 import { ControllerProfileModule } from "./profile/profile.module";
 import { ControllerProfilesModule } from "./profile/profiles.module";
 import { ControllerMeModule } from "./interaction/me.module";
+import { ControllerChatModule } from "./chat/chat.module";
+import { ControllerNotificationsModule } from "./notification/notification.module";
+import { NotificationService } from "./notification/notification.service";
+import { NotificationRepository } from "./database/repositories/notification.repository";
 
 
 async function main() {
@@ -41,21 +43,19 @@ async function main() {
   const server = createServer(app);
   const { realtime, presence } = setupRealtime(server, new UserRepository(sql));
 
+  const notifications = new NotificationService(
+    new NotificationRepository(sql),
+    realtime,
+    transformers,
+  );
+
   app.use(Routes.Health, ControllerHealthModule({ sql, transformers }));
   app.use(Routes.Auth.Base, ControllerAuthModule({ sql, transformers }));
   app.use(Routes.Profile.Base, ControllerProfileModule({ sql, transformers, presence }));
-  app.use(Routes.Profiles.Base, ControllerProfilesModule({ sql, transformers, presence, realtime }));
-  app.use(Routes.Me.Base, ControllerMeModule({ sql, transformers, presence, realtime }));
-
-  if (!isProd) {
-    app.post("/api/debug/emit", authGuard, (req, res) => {
-      realtime.emitToUser(getSession(req).userId, "test", {
-        at: Date.now(),
-        message: "hello from server",
-      });
-      res.json({ ok: true });
-    });
-  }
+  app.use(Routes.Profiles.Base, ControllerProfilesModule({ sql, transformers, presence, notifications }));
+  app.use(Routes.Me.Base, ControllerMeModule({ sql, transformers, presence, notifications }));
+  app.use(Routes.Chat.Base, ControllerChatModule({ sql, transformers, presence, realtime }));
+  app.use(Routes.Notifications.Base, ControllerNotificationsModule(notifications));
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

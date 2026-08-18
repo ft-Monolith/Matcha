@@ -21,7 +21,6 @@ export function LikeButton({ profile, onChange }: LikeButtonProps) {
         ? await API.profiles.unlike(profile.userId)
         : await API.profiles.like(profile.userId);
       if (r.error) return toast.error(String(r.data));
-      if (!profile.likedByMe && r.data.likesMe) toast.success("It's a match!");
       onChange(r.data);
     });
   }

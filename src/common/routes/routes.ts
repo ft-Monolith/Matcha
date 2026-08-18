@@ -43,4 +43,18 @@ export const Routes = {
     Visits: "/api/me/visits",
     Blocks: "/api/me/blocks",
   },
+
+  Chat: {
+    Base: "/api/chat",
+    Conversations: "/api/chat",
+    Thread: "/api/chat/:id",
+    ThreadRead: "/api/chat/:id/read",
+  },
+
+  Notifications: {
+    Base: "/api/notifications",
+    List: "/api/notifications",
+    Read: "/api/notifications/read",
+    ById: "/api/notifications/:id",
+  },
 } as const;

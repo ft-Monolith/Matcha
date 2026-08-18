@@ -2,8 +2,20 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import { API } from "@web/API/api";
-import { $user, $authReady, $presence, $use, type Presence } from "@web/observables/observables";
+import type { NotificationDTO } from "@common/dto/notification.dto";
+import type { MessageDTO } from "@common/dto/chat.dto";
+import {
+  $user,
+  $authReady,
+  $presence,
+  $notifUnread,
+  $openChatUser,
+  $use,
+  type Presence,
+} from "@web/observables/observables";
 import { socket, connectSocket, disconnectSocket } from "@web/realtime/socket";
+import { notificationText } from "@web/utils/notificationText";
+import { refreshNotifUnread, refreshChatUnread } from "@web/utils/badges";
 import { WebRoutes } from "@web/routes";
 import { AppLayout } from "@web/component/AppLayout";
 import { AuthView } from "@web/view/auth/authView";
@@ -39,8 +51,35 @@ export function App() {
   useEffect(() => {
     if (!isAuthed) return;
     connectSocket();
+    refreshNotifUnread();
+    refreshChatUnread();
     return () => disconnectSocket();
   }, [isAuthed]);
+
+  useEffect(() => {
+    const onNotif = (n: NotificationDTO) => {
+      $notifUnread.set($notifUnread.get() + 1);
+      toast(notificationText(n));
+    };
+    socket.on("notification", onNotif);
+    return () => {
+      socket.off("notification", onNotif);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onMessage = (p: { message: MessageDTO; with: string; fromName: string }) => {
+      refreshChatUnread();
+      const myId = $user.get()?.id;
+      if (p.message.senderId !== myId && p.with !== $openChatUser.get()) {
+        toast(`${p.fromName} sent you a message`);
+      }
+    };
+    socket.on("message", onMessage);
+    return () => {
+      socket.off("message", onMessage);
+    };
+  }, []);
 
   useEffect(() => {
     const onPresence = (p: { userId: string } & Presence) => {
@@ -52,17 +91,6 @@ export function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const onTest = (payload: unknown) => {
-      console.log("[ws] test event", payload);
-      toast("WS test event received");
-    };
-    socket.on("test", onTest);
-    return () => {
-      socket.off("test", onTest);
-    };
-  }, []);
 
   if (!authReady) {
     return <div className="flex min-h-screen items-center justify-center">Loading…</div>;

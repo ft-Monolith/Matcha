@@ -12,6 +12,11 @@ export interface Presence {
 }
 export const $presence = observable<Record<string, Presence>>({});
 
+export const $notifUnread = observable(0);
+export const $chatUnread = observable(0);
+
+export const $openChatUser = observable<string | null>(null);
+
 export function $use<T>(o: Observable<T>): T {
   return useSelector(() => o.get());
 }

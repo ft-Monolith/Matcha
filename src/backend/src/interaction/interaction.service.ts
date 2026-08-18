@@ -4,7 +4,7 @@ import type { Paginated } from "@common/dto/pagination.dto";
 import { HttpError } from "../app/http-error";
 import type { TransformersService } from "../app/services/transformers.service";
 import type { PresenceService } from "../app/realtime/presence.service";
-import type { RealtimeService } from "../app/realtime/realtime.service";
+import type { NotificationService } from "../notification/notification.service";
 import type { UserRepository } from "../database/repositories/user.repository";
 import type { LikeRepository } from "../database/repositories/like.repository";
 import type { VisitRepository } from "../database/repositories/visit.repository";
@@ -22,7 +22,7 @@ export class InteractionService {
     private readonly pictures: PictureRepository,
     private readonly transformers: TransformersService,
     private readonly presence: PresenceService,
-    private readonly realtime: RealtimeService,
+    private readonly notifications: NotificationService,
   ) {}
 
   isBlocked(a: string, b: string): Promise<boolean> {
@@ -45,10 +45,10 @@ export class InteractionService {
     const likesMe = await this.likes.exists(targetId, likerId);
 
     if (inserted) {
-      this.realtime.emitToUser(targetId, "notification", { type: "like", from: likerId });
+      await this.notifications.create(targetId, "like", likerId);
       if (likesMe) {
-        this.realtime.emitToUser(targetId, "notification", { type: "match", from: likerId });
-        this.realtime.emitToUser(likerId, "notification", { type: "match", from: targetId });
+        await this.notifications.create(targetId, "match", likerId);
+        await this.notifications.create(likerId, "match", targetId);
       }
     }
 
@@ -64,7 +64,7 @@ export class InteractionService {
     const likesMe = await this.likes.exists(targetId, likerId);
 
     if (removed && wasMatched) {
-      this.realtime.emitToUser(targetId, "notification", { type: "unlike", from: likerId });
+      await this.notifications.create(targetId, "unlike", likerId);
     }
 
     return { likedByMe: false, likesMe };
@@ -92,7 +92,7 @@ export class InteractionService {
     if (await this.blocks.isBlockedEither(visitorId, visitedId)) return;
     const firstVisit = await this.visits.record(visitorId, visitedId);
     if (firstVisit) {
-      this.realtime.emitToUser(visitedId, "notification", { type: "visit", from: visitorId });
+      await this.notifications.create(visitedId, "visit", visitorId);
     }
   }
 

@@ -1,7 +1,7 @@
 import type { Sql } from "../database/client";
 import type { TransformersService } from "../app/services/transformers.service";
 import type { PresenceService } from "../app/realtime/presence.service";
-import type { RealtimeService } from "../app/realtime/realtime.service";
+import type { NotificationService } from "../notification/notification.service";
 import { UserRepository } from "../database/repositories/user.repository";
 import { LikeRepository } from "../database/repositories/like.repository";
 import { VisitRepository } from "../database/repositories/visit.repository";
@@ -14,7 +14,7 @@ export interface InteractionDeps {
   sql: Sql;
   transformers: TransformersService;
   presence: PresenceService;
-  realtime: RealtimeService;
+  notifications: NotificationService;
 }
 
 export function buildInteractionService(deps: InteractionDeps): InteractionService {
@@ -33,6 +33,6 @@ export function buildInteractionService(deps: InteractionDeps): InteractionServi
     pictures,
     deps.transformers,
     deps.presence,
-    deps.realtime,
+    deps.notifications,
   );
 }
