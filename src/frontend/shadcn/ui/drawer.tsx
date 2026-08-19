@@ -45,6 +45,11 @@ function DrawerContent({
       <DrawerOverlay />
       <DrawerPrimitive.Content
         data-slot="drawer-content"
+        tabIndex={-1}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault()
+          ;(e.currentTarget as HTMLElement | null)?.focus()
+        }}
         onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(
           "group/drawer-content bg-background fixed z-50 flex h-auto flex-col",
