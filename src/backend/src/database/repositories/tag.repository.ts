@@ -21,7 +21,7 @@ export class TagRepository {
       if (names.length === 0) return;
 
       const tags = await tx<{ id: string }[]>`
-        SELECT id FROM tags WHERE name = ANY(${names}::citext[])
+        SELECT id FROM tags WHERE name = ANY(${names}::text[]::citext[])
       `;
 
       const rows = tags.map((t) => ({ user_id: userId, tag_id: t.id }));
