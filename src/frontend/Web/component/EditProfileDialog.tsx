@@ -96,6 +96,7 @@ export function EditProfileDialog({
     location.city !== profile.city ||
     location.consent !== profile.locationConsent;
   const dirty = profileDirty || accountDirty || tagsDirty || locationDirty;
+  const locationValid = location.latitude != null && location.longitude != null;
 
   function save() {
     if (!dirty) return;
@@ -196,11 +197,16 @@ export function EditProfileDialog({
 
           <Section title="Location">
             <LocationField value={location} onChange={setLocation} />
+            {!locationValid && (
+              <p className="text-destructive text-xs">
+                A location is required — set it via GPS or pick a city.
+              </p>
+            )}
           </Section>
         </div>
 
         <DialogFooter className="border-t px-6 py-4">
-          <Button onClick={save} disabled={saving || !dirty}>
+          <Button onClick={save} disabled={saving || !dirty || !locationValid}>
             {saving ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>

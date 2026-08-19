@@ -50,6 +50,7 @@ export interface ProfileDTO {
   likedByMe: boolean;
   likesMe: boolean;
   fame: number;
+  distance: number | null;
 }
 
 export interface ProfilePreviewDTO {

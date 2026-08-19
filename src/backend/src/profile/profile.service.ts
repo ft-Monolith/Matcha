@@ -36,6 +36,17 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/webp": "webp",
 };
 
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export class ProfileService {
   constructor(
     private readonly users: UserRepository,
@@ -107,6 +118,7 @@ export class ProfileService {
 
     const [
       profile,
+      viewerProfile,
       tags,
       pictures,
       likedByMe,
@@ -116,6 +128,7 @@ export class ProfileService {
       reportsReceived,
     ] = await Promise.all([
       this.profiles.findByUserId(targetId),
+      this.profiles.findByUserId(viewerId),
       this.tags.findByUserId(targetId),
       this.pictures.findByUserId(targetId),
       this.likes.exists(viewerId, targetId),
@@ -125,12 +138,28 @@ export class ProfileService {
       this.reports.countReceived(targetId),
     ]);
 
+    const distance =
+      profile?.latitude != null &&
+      profile?.longitude != null &&
+      viewerProfile?.latitude != null &&
+      viewerProfile?.longitude != null
+        ? Math.round(
+            haversineKm(
+              viewerProfile.latitude,
+              viewerProfile.longitude,
+              profile.latitude,
+              profile.longitude,
+            ) * 10,
+          ) / 10
+        : null;
+
     return this.transformers.profileToDTO(
       { user, profile, tags, pictures },
       this.presence.isOnline(targetId),
       likedByMe,
       likesMe,
       computeFame(likesReceived, visitsReceived, reportsReceived),
+      distance,
     );
   }
 
@@ -171,6 +200,11 @@ export class ProfileService {
 
 
   async updateLocation(userId: string, dto: UpdateLocationDTO): Promise<MyProfileDTO> {
+    const user = await this.users.findById(userId);
+    if (user?.onboarded && (dto.latitude == null || dto.longitude == null)) {
+      throw new HttpError(400, "A location is required — use GPS or pick a city");
+    }
+
     await this.profiles.updateLocation(userId, {
       latitude: dto.latitude ?? null,
       longitude: dto.longitude ?? null,

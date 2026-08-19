@@ -10,7 +10,6 @@ import {
   type ProfileFiltersValue,
 } from "@web/component/ProfileFilters";
 
-/** La recherche part des profils les plus populaires (sujet IV.4). */
 const SEARCH_FILTERS: ProfileFiltersValue = { ...EMPTY_FILTERS, sort: "fame" };
 
 export function SearchView() {

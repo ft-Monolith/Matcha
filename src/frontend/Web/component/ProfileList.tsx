@@ -8,7 +8,7 @@ import { NextObserver } from "@web/component/NextObserver";
 import { ProfileDialog } from "@web/component/ProfileDialog";
 import { Skeleton } from "@shadcn/ui/skeleton";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 
 interface ProfileListProps {
   fetchPage: (limit: number, offset: number) => Promise<APIResponse<Paginated<ProfilePreviewDTO>>>;
@@ -65,7 +65,7 @@ export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-6">
         {items.map((p) => (
           <CompactProfileCard key={p.userId} profile={p} onClick={() => setSelected(p.userId)} />
         ))}

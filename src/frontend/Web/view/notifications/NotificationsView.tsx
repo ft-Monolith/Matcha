@@ -13,6 +13,7 @@ import {
 import type { NotificationDTO, NotificationType } from "@common/dto/notification.dto";
 import { API } from "@web/API/api";
 import { $notifUnread } from "@web/observables/observables";
+import { socket } from "@web/realtime/socket";
 import { WebRoutes } from "@web/routes";
 import { loadingWrapper } from "@web/utils/loadingWrapper";
 import { notificationText } from "@web/utils/notificationText";
@@ -73,6 +74,23 @@ export function NotificationsView() {
       if (!r.error) $notifUnread.set(0);
     });
   }, [loadPage]);
+
+
+  useEffect(() => {
+    const onNotif = (n: NotificationDTO) => {
+      setItems((prev) => {
+        if (prev.some((x) => x.id === n.id)) return prev;
+        offsetRef.current += 1; 
+        return [{ ...n, read: true }, ...prev];
+      });
+      $notifUnread.set(0);
+      API.notifications.markAllRead();
+    };
+    socket.on("notification", onNotif);
+    return () => {
+      socket.off("notification", onNotif);
+    };
+  }, []);
 
   function remove(id: string) {
     setItems((prev) => prev.filter((n) => n.id !== id));
