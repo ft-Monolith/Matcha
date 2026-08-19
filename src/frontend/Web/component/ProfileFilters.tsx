@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import type { SearchParams, SortField, SortOrder } from "@common/dto/search.dto";
+import {
+  clampRange,
+  SEARCH_AGE_MAX,
+  SEARCH_AGE_MIN,
+  SEARCH_DISTANCE_MAX,
+  SEARCH_DISTANCE_MIN,
+  SEARCH_FAME_MAX,
+  SEARCH_FAME_MIN,
+  type SearchParams,
+  type SortField,
+  type SortOrder,
+} from "@common/dto/search.dto";
 import { TagPicker } from "@web/component/fields/TagPicker";
 import { Badge } from "@shadcn/ui/badge";
 import { Button } from "@shadcn/ui/button";
@@ -47,18 +58,31 @@ export const EMPTY_FILTERS: ProfileFiltersValue = {
   order: "desc",
 };
 
-function num(s: string): number | undefined {
+function num(s: string, min: number, max: number): number | undefined {
   const n = Number(s);
-  return s.trim() !== "" && Number.isFinite(n) ? n : undefined;
+  if (s.trim() === "" || !Number.isFinite(n)) return undefined;
+  return clampRange(Math.trunc(n), min, max);
 }
 
 export function toSearchParams(v: ProfileFiltersValue): SearchParams {
+  let ageMin = num(v.ageMin, SEARCH_AGE_MIN, SEARCH_AGE_MAX);
+  let ageMax = num(v.ageMax, SEARCH_AGE_MIN, SEARCH_AGE_MAX);
+  if (ageMin !== undefined && ageMax !== undefined && ageMin > ageMax) {
+    [ageMin, ageMax] = [ageMax, ageMin];
+  }
+
+  let fameMin = num(v.fameMin, SEARCH_FAME_MIN, SEARCH_FAME_MAX);
+  let fameMax = num(v.fameMax, SEARCH_FAME_MIN, SEARCH_FAME_MAX);
+  if (fameMin !== undefined && fameMax !== undefined && fameMin > fameMax) {
+    [fameMin, fameMax] = [fameMax, fameMin];
+  }
+
   return {
-    ageMin: num(v.ageMin),
-    ageMax: num(v.ageMax),
-    fameMin: num(v.fameMin),
-    fameMax: num(v.fameMax),
-    maxDistance: num(v.maxDistance),
+    ageMin,
+    ageMax,
+    fameMin,
+    fameMax,
+    maxDistance: num(v.maxDistance, SEARCH_DISTANCE_MIN, SEARCH_DISTANCE_MAX),
     tags: v.tags,
     hideFlagged: v.hideFlagged,
     sort: v.sort,
@@ -128,24 +152,26 @@ export function ProfileFilters({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Age min</Label>
-                  <Input type="number" value={value.ageMin} onChange={(e) => set("ageMin", e.target.value)} />
+                  <Input type="number" min={SEARCH_AGE_MIN} max={SEARCH_AGE_MAX} value={value.ageMin} onChange={(e) => set("ageMin", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Age max</Label>
-                  <Input type="number" value={value.ageMax} onChange={(e) => set("ageMax", e.target.value)} />
+                  <Input type="number" min={SEARCH_AGE_MIN} max={SEARCH_AGE_MAX} value={value.ageMax} onChange={(e) => set("ageMax", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Fame min</Label>
-                  <Input type="number" value={value.fameMin} onChange={(e) => set("fameMin", e.target.value)} />
+                  <Input type="number" min={SEARCH_FAME_MIN} max={SEARCH_FAME_MAX} value={value.fameMin} onChange={(e) => set("fameMin", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Fame max</Label>
-                  <Input type="number" value={value.fameMax} onChange={(e) => set("fameMax", e.target.value)} />
+                  <Input type="number" min={SEARCH_FAME_MIN} max={SEARCH_FAME_MAX} value={value.fameMax} onChange={(e) => set("fameMax", e.target.value)} />
                 </div>
                 <div className="col-span-2 space-y-1.5">
                   <Label>Max distance (km)</Label>
                   <Input
                     type="number"
+                    min={SEARCH_DISTANCE_MIN}
+                    max={SEARCH_DISTANCE_MAX}
                     value={value.maxDistance}
                     onChange={(e) => set("maxDistance", e.target.value)}
                   />

@@ -1,8 +1,15 @@
 import type { Request, Response, Router } from "express";
-import type {
-  SearchParams,
-  SortField,
-  SortOrder,
+import {
+  clampRange,
+  SEARCH_AGE_MAX,
+  SEARCH_AGE_MIN,
+  SEARCH_DISTANCE_MAX,
+  SEARCH_DISTANCE_MIN,
+  SEARCH_FAME_MAX,
+  SEARCH_FAME_MIN,
+  type SearchParams,
+  type SortField,
+  type SortOrder,
 } from "@common/dto/search.dto";
 import type { ProfileService } from "./profile.service";
 import type { InteractionService } from "../interaction/interaction.service";
@@ -31,10 +38,11 @@ function clampInt(
   return Math.min(Math.max(Math.trunc(n), min), max);
 }
 
-function optNum(value: unknown): number | undefined {
+function optNum(value: unknown, min: number, max: number): number | undefined {
   if (value === undefined || value === "") return undefined;
   const n = Number(value);
-  return Number.isFinite(n) ? n : undefined;
+  if (!Number.isFinite(n)) return undefined;
+  return clampRange(Math.trunc(n), min, max);
 }
 
 function parseSearchParams(query: Request["query"]): SearchParams {
@@ -52,11 +60,11 @@ function parseSearchParams(query: Request["query"]): SearchParams {
       : undefined;
 
   return {
-    ageMin: optNum(query.ageMin),
-    ageMax: optNum(query.ageMax),
-    fameMin: optNum(query.fameMin),
-    fameMax: optNum(query.fameMax),
-    maxDistance: optNum(query.maxDistance),
+    ageMin: optNum(query.ageMin, SEARCH_AGE_MIN, SEARCH_AGE_MAX),
+    ageMax: optNum(query.ageMax, SEARCH_AGE_MIN, SEARCH_AGE_MAX),
+    fameMin: optNum(query.fameMin, SEARCH_FAME_MIN, SEARCH_FAME_MAX),
+    fameMax: optNum(query.fameMax, SEARCH_FAME_MIN, SEARCH_FAME_MAX),
+    maxDistance: optNum(query.maxDistance, SEARCH_DISTANCE_MIN, SEARCH_DISTANCE_MAX),
     tags,
     hideFlagged: query.hideFlagged !== "false",
     sort,
