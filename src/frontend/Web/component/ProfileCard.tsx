@@ -56,6 +56,7 @@ export function ProfileCard({ profile, actions, floatingAction, fill }: ProfileC
           name={firstName}
           age={birthdate ? ageFrom(birthdate) : null}
           city={city}
+          distance={profile.distance}
           gender={gender}
           sexualPref={sexualPref}
           fame={fame}
@@ -120,6 +121,7 @@ interface ImageHeroProps {
   name: string;
   age: number | null;
   city: string | null;
+  distance: number | null;
   gender: ProfileDTO["gender"];
   sexualPref: ProfileDTO["sexualPref"];
   fame: number;
@@ -136,6 +138,7 @@ function ImageHero({
   name,
   age,
   city,
+  distance,
   gender,
   sexualPref,
   fame,
@@ -179,10 +182,16 @@ function ImageHero({
               {name}
               {age != null && <span className="font-medium text-white/85">, {age}</span>}
             </h1>
-            {city && (
+            {(city || distance != null) && (
               <p className="mt-0.5 flex items-center gap-1 text-sm text-white/85">
                 <MapPin className="size-3.5" />
                 {city}
+                {distance != null && (
+                  <span className="text-white/70">
+                    {city ? " · " : ""}
+                    {distance} km away
+                  </span>
+                )}
               </p>
             )}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">

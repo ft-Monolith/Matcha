@@ -4,7 +4,7 @@ import type { Paginated } from "@common/dto/pagination.dto";
 import type { APIResponse } from "@web/API/fetchAPI";
 import { loadingWrapper } from "@web/utils/loadingWrapper";
 
-export const PROFILE_PAGE_SIZE = 20;
+export const PROFILE_PAGE_SIZE = 24;
 
 export type FetchProfilePage = (
   limit: number,

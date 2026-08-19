@@ -59,6 +59,7 @@ export class TransformersService {
     likedByMe = false,
     likesMe = false,
     fame = 0,
+    distance: number | null = null,
   ): ProfileDTO {
     const { user, profile, tags, pictures } = agg;
 
@@ -83,6 +84,7 @@ export class TransformersService {
       likedByMe,
       likesMe,
       fame,
+      distance,
     };
   }
 

@@ -34,7 +34,7 @@ export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-6">
         {items.map((p) => (
           <CompactProfileCard key={p.userId} profile={p} onClick={() => setSelected(p.userId)} />
         ))}

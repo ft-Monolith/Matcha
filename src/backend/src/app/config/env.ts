@@ -23,7 +23,7 @@ export const env = {
   jwt: {
     accessSecret: required("JWT_ACCESS_SECRET"),
     refreshSecret: required("JWT_REFRESH_SECRET"),
-    accessTtl: "15m",
+    accessTtl: "2h",
     refreshTtl: "7d",
   },
 
