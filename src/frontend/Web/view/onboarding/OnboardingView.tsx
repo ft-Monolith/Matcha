@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import type { Gender, MyProfileDTO, SexualPref } from "@common/dto/profile.dto";
 import { API } from "@web/API/api";
@@ -13,6 +13,7 @@ import { PhotoManager } from "@web/component/fields/PhotoManager";
 import { LocationField, type LocationValue } from "@web/component/fields/LocationField";
 import { Button } from "@shadcn/ui/button";
 import { Label } from "@shadcn/ui/label";
+import { cn } from "@shadcn/lib/utils";
 
 export function OnboardingView() {
   const [profile, setProfile] = useState<MyProfileDTO | null>(null);
@@ -27,13 +28,9 @@ export function OnboardingView() {
     city: null,
     consent: false,
   });
+  const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function clear(field: string) {
-    setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
-  }
 
   useEffect(() => {
     API.profile.getMe().then((r) => {
@@ -56,36 +53,72 @@ export function OnboardingView() {
 
   const pictures = profile?.pictures ?? [];
 
-  // Bouton Finish actif seulement quand tout le profil requis est renseigné
-  const canFinish =
-    !!gender &&
-    !!birthdate &&
-    bio.trim() !== "" &&
-    tags.length > 0 &&
-    location.latitude != null &&
-    location.longitude != null &&
-    pictures.length > 0;
+  const steps = [
+    {
+      title: "Add your photos",
+      subtitle: "Show your best self — one becomes your profile picture.",
+      valid: pictures.length > 0,
+      content: <PhotoManager pictures={pictures} onChange={setProfile} />,
+    },
+    {
+      title: "About you",
+      subtitle: "The basics people will see on your profile.",
+      valid: !!gender && !!birthdate && bio.trim() !== "",
+      content: (
+        <>
+          <FieldRow label="Gender">
+            <GenderSelect value={gender} onChange={setGender} />
+          </FieldRow>
+          <FieldRow label="Sexual preference">
+            <SexualPrefSelect value={pref} onChange={setPref} />
+          </FieldRow>
+          <FieldRow label="Birthdate">
+            <BirthdateField value={birthdate} onChange={setBirthdate} />
+          </FieldRow>
+          <FieldRow label="Biography">
+            <BioField value={bio} onChange={setBio} />
+          </FieldRow>
+        </>
+      ),
+    },
+    {
+      title: "Your interests",
+      subtitle: "Pick a few tags — they help us find better matches.",
+      valid: tags.length > 0,
+      content: <TagPicker value={tags} onChange={setTags} />,
+    },
+    {
+      title: "Where are you?",
+      subtitle: "Allow location or pick your city to see nearby people.",
+      valid: location.latitude != null && location.longitude != null,
+      content: <LocationField value={location} onChange={setLocation} />,
+    },
+  ];
+
+  const current = steps[step];
+  const isLast = step === steps.length - 1;
+  const allValid = steps.every((s) => s.valid);
+
+  function next() {
+    if (!current.valid) return;
+    setStep((s) => Math.min(s + 1, steps.length - 1));
+    window.scrollTo({ top: 0 });
+  }
+
+  function back() {
+    setStep((s) => Math.max(s - 1, 0));
+    window.scrollTo({ top: 0 });
+  }
 
   function logout() {
     return loadingWrapper(setLoggingOut, () => API.auth.logout().then(() => $user.set(null)));
   }
 
   function finish() {
-    const e: Record<string, string> = {};
-    if (!gender) e.gender = "Please select your gender.";
-    if (!birthdate) e.birthdate = "Please pick your birthdate.";
-    if (!bio.trim()) e.biography = "Tell us a bit about yourself.";
-    if (tags.length === 0) e.tags = "Select at least one interest.";
-    if (location.latitude == null || location.longitude == null)
-      e.location = "Set your location (allow GPS or pick your city).";
-    if (pictures.length === 0) e.photos = "Add at least one photo.";
-
-    setErrors(e);
-    if (Object.keys(e).length > 0) {
-      toast.error("Please complete the highlighted fields.");
+    if (!allValid) {
+      toast.error("Please complete every step first.");
       return;
     }
-
     return loadingWrapper(setSaving, async () => {
       const up = await API.profile.updateProfile({
         gender,
@@ -114,99 +147,62 @@ export function OnboardingView() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-5 p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold">Complete your profile</h1>
-          <p className="text-muted-foreground text-sm">
-            A few details before you can start browsing.
-          </p>
-        </div>
+    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-semibold">Matcha</span>
         <Button variant="ghost" size="sm" disabled={loggingOut} onClick={logout}>
           {loggingOut ? "…" : "Log out"}
         </Button>
       </div>
 
-      <div className="space-y-1">
-        <Label>Gender</Label>
-        <GenderSelect
-          value={gender}
-          onChange={(v) => {
-            setGender(v);
-            clear("gender");
-          }}
-        />
-        {errors.gender && <p className="text-destructive text-xs">{errors.gender}</p>}
+      <div className="mt-4 flex gap-1.5">
+        {steps.map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "h-1.5 flex-1 rounded-full transition-colors",
+              i <= step ? "bg-primary" : "bg-muted",
+            )}
+          />
+        ))}
+      </div>
+      <p className="text-muted-foreground mt-2 text-xs">
+        Step {step + 1} of {steps.length}
+      </p>
+
+      <div className="flex flex-1 flex-col mt-5 py-6">
+        <div>
+          <h1 className="text-2xl font-semibold">{current.title}</h1>
+          <p className="text-muted-foreground text-sm">{current.subtitle}</p>
+        </div>
+        <div className="mt-5 space-y-4">{current.content}</div>
       </div>
 
-      <div className="space-y-1">
-        <Label>Sexual preference</Label>
-        <SexualPrefSelect value={pref} onChange={setPref} />
+      <div className="flex gap-2">
+        {step > 0 && (
+          <Button variant="outline" className="flex-1" onClick={back}>
+            Back
+          </Button>
+        )}
+        {isLast ? (
+          <Button className="flex-1" disabled={saving || !allValid} onClick={finish}>
+            {saving ? "Saving…" : "Finish"}
+          </Button>
+        ) : (
+          <Button className="flex-1" disabled={!current.valid} onClick={next}>
+            Next
+          </Button>
+        )}
       </div>
+    </div>
+  );
+}
 
-      <div className="space-y-1">
-        <Label>Birthdate</Label>
-        <BirthdateField
-          value={birthdate}
-          onChange={(v) => {
-            setBirthdate(v);
-            clear("birthdate");
-          }}
-        />
-        {errors.birthdate && <p className="text-destructive text-xs">{errors.birthdate}</p>}
-      </div>
-
-      <div className="space-y-1">
-        <Label>Biography</Label>
-        <BioField
-          value={bio}
-          onChange={(v) => {
-            setBio(v);
-            clear("biography");
-          }}
-        />
-        {errors.biography && <p className="text-destructive text-xs">{errors.biography}</p>}
-      </div>
-
-      <div className="space-y-1">
-        <Label>Interests</Label>
-        <TagPicker
-          value={tags}
-          onChange={(v) => {
-            setTags(v);
-            clear("tags");
-          }}
-        />
-        {errors.tags && <p className="text-destructive text-xs">{errors.tags}</p>}
-      </div>
-
-      <div className="space-y-1">
-        <Label>Location</Label>
-        <LocationField
-          value={location}
-          onChange={(v) => {
-            setLocation(v);
-            clear("location");
-          }}
-        />
-        {errors.location && <p className="text-destructive text-xs">{errors.location}</p>}
-      </div>
-
-      <div className="space-y-1">
-        <Label>Photos</Label>
-        <PhotoManager
-          pictures={pictures}
-          onChange={(p) => {
-            setProfile(p);
-            clear("photos");
-          }}
-        />
-        {errors.photos && <p className="text-destructive text-xs">{errors.photos}</p>}
-      </div>
-
-      <Button onClick={finish} disabled={saving || !canFinish}>
-        {saving ? "Saving…" : "Finish"}
-      </Button>
+function FieldRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {children}
     </div>
   );
 }
