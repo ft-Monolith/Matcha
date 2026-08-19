@@ -45,10 +45,11 @@ export class InteractionService {
     const likesMe = await this.likes.exists(targetId, likerId);
 
     if (inserted) {
-      await this.notifications.create(targetId, "like", likerId);
       if (likesMe) {
         await this.notifications.create(targetId, "match", likerId);
         await this.notifications.create(likerId, "match", targetId);
+      } else {
+        await this.notifications.create(targetId, "like", likerId);
       }
     }
 

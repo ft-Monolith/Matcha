@@ -18,7 +18,6 @@ function ageFrom(birthdate: string): number {
 
 interface ProfileCardProps {
   profile: ProfileDTO;
-  // bouton contextuel surtout pour le cas edit
   actions?: ReactNode;
 }
 
@@ -31,7 +30,7 @@ export function ProfileCard({ profile, actions }: ProfileCardProps) {
   const initials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
 
   return (
-    <Card className="mx-auto w-full max-w-md">
+    <Card className="mx-auto w-full max-w-md border-0 shadow-none">
       <CardContent className="flex flex-col items-center gap-4 pt-6">
         <div className="relative">
           <Avatar className="size-28">
