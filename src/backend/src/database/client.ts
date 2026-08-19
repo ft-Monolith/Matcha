@@ -5,7 +5,7 @@ export type Sql = ReturnType<typeof postgres>;
 
 export function createSqlClient(): Sql {
   return postgres(env.databaseUrl, {
-    max: 10, 
+    max: 10,
     onnotice: () => {},
   });
 }

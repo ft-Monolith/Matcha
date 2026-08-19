@@ -110,7 +110,8 @@ export function PhotoManager({ pictures, onChange }: PhotoManagerProps) {
       </div>
 
       <p className="text-muted-foreground text-xs">
-        {pictures.length}/{MAX_PHOTOS} photos · the highlighted one is your profile picture
+        {pictures.length}/{MAX_PHOTOS} photos · the highlighted one is your
+        profile picture
       </p>
 
       <input

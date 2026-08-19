@@ -41,10 +41,16 @@ export class APIProfile extends IAPI {
   }
 
   deletePhoto(id: string): Promise<APIResponse<MyProfileDTO>> {
-    return this.fetch<MyProfileDTO>("DELETE", Routes.Profile.Photo.replace(":id", id));
+    return this.fetch<MyProfileDTO>(
+      "DELETE",
+      Routes.Profile.Photo.replace(":id", id),
+    );
   }
 
   setProfilePhoto(id: string): Promise<APIResponse<MyProfileDTO>> {
-    return this.fetch<MyProfileDTO>("PATCH", Routes.Profile.PhotoProfile.replace(":id", id));
+    return this.fetch<MyProfileDTO>(
+      "PATCH",
+      Routes.Profile.PhotoProfile.replace(":id", id),
+    );
   }
 }

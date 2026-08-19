@@ -15,10 +15,13 @@ const BROWSE_FILTERS: ProfileFiltersValue = EMPTY_FILTERS;
 
 export function BrowseView() {
   const [draft, setDraft] = useState<ProfileFiltersValue>(BROWSE_FILTERS);
-  const [applied, setApplied] = useState<SearchParams>(toSearchParams(BROWSE_FILTERS));
+  const [applied, setApplied] = useState<SearchParams>(
+    toSearchParams(BROWSE_FILTERS),
+  );
 
   const fetchPage = useCallback(
-    (limit: number, offset: number) => API.profiles.search({ ...applied, limit, offset }),
+    (limit: number, offset: number) =>
+      API.profiles.search({ ...applied, limit, offset }),
     [applied],
   );
 
@@ -40,7 +43,10 @@ export function BrowseView() {
       </div>
 
       <div className="min-h-0 flex-1">
-        <ProfileDeck fetchPage={fetchPage} emptyMessage="No suggestions for you yet." />
+        <ProfileDeck
+          fetchPage={fetchPage}
+          emptyMessage="No suggestions for you yet."
+        />
       </div>
     </div>
   );

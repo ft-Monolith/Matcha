@@ -6,8 +6,11 @@ interface NextObserverProps {
   finishedMessage?: string;
 }
 
-
-export function NextObserver({ hasNext, onNext, finishedMessage }: NextObserverProps) {
+export function NextObserver({
+  hasNext,
+  onNext,
+  finishedMessage,
+}: NextObserverProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +29,10 @@ export function NextObserver({ hasNext, onNext, finishedMessage }: NextObserverP
   }, [hasNext, loading, onNext]);
 
   return (
-    <div ref={ref} className="flex justify-center p-4 text-muted-foreground text-sm">
+    <div
+      ref={ref}
+      className="flex justify-center p-4 text-muted-foreground text-sm"
+    >
       {loading && "Loading…"}
       {!hasNext && !loading && (finishedMessage ?? "No more results")}
     </div>

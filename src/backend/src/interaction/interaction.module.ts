@@ -17,7 +17,9 @@ export interface InteractionDeps {
   notifications: NotificationService;
 }
 
-export function buildInteractionService(deps: InteractionDeps): InteractionService {
+export function buildInteractionService(
+  deps: InteractionDeps,
+): InteractionService {
   const users = new UserRepository(deps.sql);
   const likes = new LikeRepository(deps.sql);
   const visits = new VisitRepository(deps.sql);

@@ -8,7 +8,12 @@ import { getSession } from "../app/session";
 const DEFAULT_LIMIT = 30;
 const MAX_LIMIT = 50;
 
-function clampInt(value: unknown, def: number, min: number, max: number): number {
+function clampInt(
+  value: unknown,
+  def: number,
+  min: number,
+  max: number,
+): number {
   const n = Number(value);
   if (!Number.isFinite(n)) return def;
   return Math.min(Math.max(Math.trunc(n), min), max);
@@ -35,13 +40,24 @@ export class ChatController {
     const { userId } = getSession(req);
     const limit = clampInt(req.query.limit, DEFAULT_LIMIT, 1, MAX_LIMIT);
     const offset = clampInt(req.query.offset, 0, 0, Number.MAX_SAFE_INTEGER);
-    res.status(200).json(await this.service.history(userId, String(req.params.id), limit, offset));
+    res
+      .status(200)
+      .json(
+        await this.service.history(
+          userId,
+          String(req.params.id),
+          limit,
+          offset,
+        ),
+      );
   };
 
   private sendHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
     const { content } = req.body as SendMessageDTO;
-    res.status(201).json(await this.service.send(userId, String(req.params.id), content));
+    res
+      .status(201)
+      .json(await this.service.send(userId, String(req.params.id), content));
   };
 
   private readHandler = async (req: Request, res: Response) => {

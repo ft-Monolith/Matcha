@@ -6,7 +6,12 @@ import { getSession } from "../app/session";
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
 
-function clampInt(value: unknown, def: number, min: number, max: number): number {
+function clampInt(
+  value: unknown,
+  def: number,
+  min: number,
+  max: number,
+): number {
   const n = Number(value);
   if (!Number.isFinite(n)) return def;
   return Math.min(Math.max(Math.trunc(n), min), max);
@@ -27,20 +32,26 @@ export class MeController {
     const { userId } = getSession(req);
     const limit = clampInt(req.query.limit, DEFAULT_LIMIT, 1, MAX_LIMIT);
     const offset = clampInt(req.query.offset, 0, 0, Number.MAX_SAFE_INTEGER);
-    res.status(200).json(await this.interactions.whoLikedMe(userId, limit, offset));
+    res
+      .status(200)
+      .json(await this.interactions.whoLikedMe(userId, limit, offset));
   };
 
   private visitsHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
     const limit = clampInt(req.query.limit, DEFAULT_LIMIT, 1, MAX_LIMIT);
     const offset = clampInt(req.query.offset, 0, 0, Number.MAX_SAFE_INTEGER);
-    res.status(200).json(await this.interactions.whoViewedMe(userId, limit, offset));
+    res
+      .status(200)
+      .json(await this.interactions.whoViewedMe(userId, limit, offset));
   };
 
   private blocksHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
     const limit = clampInt(req.query.limit, DEFAULT_LIMIT, 1, MAX_LIMIT);
     const offset = clampInt(req.query.offset, 0, 0, Number.MAX_SAFE_INTEGER);
-    res.status(200).json(await this.interactions.whoIBlocked(userId, limit, offset));
+    res
+      .status(200)
+      .json(await this.interactions.whoIBlocked(userId, limit, offset));
   };
 }

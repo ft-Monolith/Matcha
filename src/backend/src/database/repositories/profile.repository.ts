@@ -64,7 +64,10 @@ export class ProfileRepository {
     return profile ?? null;
   }
 
-  async upsert(userId: string, input: UpsertProfileInput): Promise<ProfileEntity> {
+  async upsert(
+    userId: string,
+    input: UpsertProfileInput,
+  ): Promise<ProfileEntity> {
     const [profile] = await this.sql<ProfileEntity[]>`
       INSERT INTO profiles (user_id, gender, sexual_pref, biography, birthdate)
       VALUES (
@@ -85,7 +88,9 @@ export class ProfileRepository {
     return profile;
   }
 
-  async search(input: SearchInput): Promise<{ rows: ProfilePreviewRow[]; total: number }> {
+  async search(
+    input: SearchInput,
+  ): Promise<{ rows: ProfilePreviewRow[]; total: number }> {
     const dir = input.order === "asc" ? this.sql`ASC` : this.sql`DESC`;
 
     const orderBy =
@@ -100,9 +105,12 @@ export class ProfileRepository {
                ELSE 4
              END) ASC,
             common_tags DESC, fame DESC, user_id`
-        : this.sql`${this.sql(SORT_COLUMNS[input.sort])} ${dir} NULLS LAST, user_id`;
+        : this
+            .sql`${this.sql(SORT_COLUMNS[input.sort])} ${dir} NULLS LAST, user_id`;
 
-    const rows = await this.sql<(ProfilePreviewRow & { total_count: number })[]>`
+    const rows = await this.sql<
+      (ProfilePreviewRow & { total_count: number })[]
+    >`
       WITH base AS (
         SELECT
           u.id         AS user_id,
@@ -179,7 +187,10 @@ export class ProfileRepository {
     return { rows, total: rows[0]?.total_count ?? 0 };
   }
 
-  async updateLocation(userId: string, input: UpdateLocationInput): Promise<ProfileEntity> {
+  async updateLocation(
+    userId: string,
+    input: UpdateLocationInput,
+  ): Promise<ProfileEntity> {
     const [profile] = await this.sql<ProfileEntity[]>`
       INSERT INTO profiles (user_id, latitude, longitude, city, location_consent)
       VALUES (

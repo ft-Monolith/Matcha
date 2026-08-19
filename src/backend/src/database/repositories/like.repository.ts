@@ -37,7 +37,11 @@ export class LikeRepository {
     return rows.length > 0;
   }
 
-  async listLikers(userId: string, limit: number, offset: number): Promise<ProfilePreviewRow[]> {
+  async listLikers(
+    userId: string,
+    limit: number,
+    offset: number,
+  ): Promise<ProfilePreviewRow[]> {
     return this.sql<ProfilePreviewRow[]>`
       SELECT
         u.id         AS user_id,

@@ -39,7 +39,9 @@ export class UserRepository {
 
     return {
       email: rows.some((r) => r.email.toLowerCase() === email.toLowerCase()),
-      username: rows.some((r) => r.username.toLowerCase() === username.toLowerCase()),
+      username: rows.some(
+        (r) => r.username.toLowerCase() === username.toLowerCase(),
+      ),
     };
   }
 

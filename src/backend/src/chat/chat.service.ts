@@ -20,16 +20,22 @@ export class ChatService {
     private readonly realtime: RealtimeService,
   ) {}
 
-  private async assertConnected(userId: string, otherId: string): Promise<void> {
+  private async assertConnected(
+    userId: string,
+    otherId: string,
+  ): Promise<void> {
     if (userId === otherId) throw new HttpError(400, "Invalid conversation");
     const other = await this.users.findById(otherId);
-    if (!other || !other.onboarded) throw new HttpError(404, "Profile not found");
+    if (!other || !other.onboarded)
+      throw new HttpError(404, "Profile not found");
     if (await this.blocks.isBlockedEither(userId, otherId)) {
       throw new HttpError(403, "You are not connected with this user");
     }
     const connected =
-      (await this.likes.exists(userId, otherId)) && (await this.likes.exists(otherId, userId));
-    if (!connected) throw new HttpError(403, "You are not connected with this user");
+      (await this.likes.exists(userId, otherId)) &&
+      (await this.likes.exists(otherId, userId));
+    if (!connected)
+      throw new HttpError(403, "You are not connected with this user");
   }
 
   async conversations(userId: string): Promise<ConversationDTO[]> {
@@ -52,10 +58,18 @@ export class ChatService {
       .slice()
       .reverse()
       .map((m) => this.transformers.messageToDTO(m));
-    return { items, totalCount: items.length, hasNextPage: rows.length === limit };
+    return {
+      items,
+      totalCount: items.length,
+      hasNextPage: rows.length === limit,
+    };
   }
 
-  async send(userId: string, otherId: string, content: string): Promise<MessageDTO> {
+  async send(
+    userId: string,
+    otherId: string,
+    content: string,
+  ): Promise<MessageDTO> {
     await this.assertConnected(userId, otherId);
     const trimmed = content.trim();
     if (trimmed === "") throw new HttpError(400, "Message cannot be empty");
@@ -66,8 +80,16 @@ export class ChatService {
     const row = await this.messages.create(userId, otherId, trimmed);
     const message = this.transformers.messageToDTO(row);
 
-    this.realtime.emitToUser(otherId, "message", { message, with: userId, fromName });
-    this.realtime.emitToUser(userId, "message", { message, with: otherId, fromName });
+    this.realtime.emitToUser(otherId, "message", {
+      message,
+      with: userId,
+      fromName,
+    });
+    this.realtime.emitToUser(userId, "message", {
+      message,
+      with: otherId,
+      fromName,
+    });
 
     return message;
   }

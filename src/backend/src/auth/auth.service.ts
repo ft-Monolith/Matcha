@@ -14,7 +14,7 @@ import { HttpError } from "../app/http-error";
 import { escapeHtml } from "../app/html";
 
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 h
-const RESET_TTL_MS = 60 * 60 * 1000; // 1 h 
+const RESET_TTL_MS = 60 * 60 * 1000; // 1 h
 
 export interface AuthTokens {
   accessToken: string;
@@ -31,9 +31,11 @@ export class AuthService {
     private readonly transformers: TransformersService,
   ) {}
 
-
   async register(input: RegisterDTO): Promise<UserDTO> {
-    const taken = await this.users.existsByEmailOrUsername(input.email, input.username);
+    const taken = await this.users.existsByEmailOrUsername(
+      input.email,
+      input.username,
+    );
     if (taken.email) throw new HttpError(409, "Email already in use");
     if (taken.username) throw new HttpError(409, "Username already taken");
 
@@ -63,7 +65,9 @@ export class AuthService {
   async login(input: LoginDTO): Promise<AuthTokens> {
     const user = await this.users.findByUsername(input.username);
 
-    const hash = user?.password_hash ?? "$argon2id$v=19$m=65536,t=3,p=4$aaaaaaaaaaaaaaaa$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const hash =
+      user?.password_hash ??
+      "$argon2id$v=19$m=65536,t=3,p=4$aaaaaaaaaaaaaaaa$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     // c est une protection pour veriier le mdp meme si le user existepas
     // si on le fait pas l'attaquant peut savoir si le user existe ou pas en mesurant le temps de reponse
     // type comme un argon hash
@@ -94,13 +98,16 @@ export class AuthService {
     return this.transformers.userToDTO(user);
   }
 
-
   async requestPasswordReset(email: string): Promise<void> {
     const user = await this.users.findByEmail(email);
     if (!user) return; // silencieux pas d erreur pour pas sortir de donner
 
     const { token, tokenHash } = generateToken();
-    await this.resetTokens.create(user.id, tokenHash, new Date(Date.now() + RESET_TTL_MS));
+    await this.resetTokens.create(
+      user.id,
+      tokenHash,
+      new Date(Date.now() + RESET_TTL_MS),
+    );
 
     const link = `${env.appUrl}/reset-password?token=${token}`;
     try {
@@ -117,7 +124,6 @@ export class AuthService {
     }
   }
 
-
   async resetPassword(token: string, newPassword: string): Promise<void> {
     const userId = await this.resetTokens.consumeValid(hashToken(token));
     if (!userId) {
@@ -127,7 +133,10 @@ export class AuthService {
     await this.users.updatePassword(userId, password_hash);
   }
 
-  private issueTokens(payload: JwtPayload, user: Parameters<TransformersService["userToDTO"]>[0]): AuthTokens {
+  private issueTokens(
+    payload: JwtPayload,
+    user: Parameters<TransformersService["userToDTO"]>[0],
+  ): AuthTokens {
     return {
       accessToken: signAccessToken(payload),
       refreshToken: signRefreshToken(payload),
@@ -135,7 +144,11 @@ export class AuthService {
     };
   }
 
-  private async sendVerificationEmail(userId: string, email: string, firstName: string) {
+  private async sendVerificationEmail(
+    userId: string,
+    email: string,
+    firstName: string,
+  ) {
     const { token, tokenHash } = generateToken();
     const expiresAt = new Date(Date.now() + VERIFICATION_TTL_MS);
     await this.tokens.create(userId, tokenHash, expiresAt);

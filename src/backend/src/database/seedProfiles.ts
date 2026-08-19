@@ -6,12 +6,9 @@ import { SEXUAL_PREFS } from "@common/constant/profile";
 import { env } from "../app/config/env";
 import { createSqlClient, type Sql } from "./client";
 
-
-
 const SEED_EMAIL_DOMAIN = "seed.matcha.local";
 const SEED_PASSWORD = "Password1!";
 const CONCURRENCY = 15;
-
 
 const AURA_CITIES: { name: string; lat: number; lon: number }[] = [
   { name: "Lyon", lat: 45.758, lon: 4.835 },
@@ -36,7 +33,11 @@ const AURA_CITIES: { name: string; lat: number; lon: number }[] = [
   { name: "Romans-sur-Isère", lat: 45.045, lon: 5.05 },
 ];
 
-function randomAuraLocation(): { city: string; latitude: number; longitude: number } {
+function randomAuraLocation(): {
+  city: string;
+  latitude: number;
+  longitude: number;
+} {
   const c = pick(AURA_CITIES);
   return {
     city: c.name,
@@ -63,7 +64,10 @@ interface RandomUser {
   name: { first: string; last: string };
   login: { username: string };
   dob: { date: string };
-  location: { city: string; coordinates: { latitude: string; longitude: string } };
+  location: {
+    city: string;
+    coordinates: { latitude: string; longitude: string };
+  };
   picture: { large: string };
 }
 
@@ -114,7 +118,8 @@ async function seedOne(
   u: RandomUser,
   index: number,
 ): Promise<void> {
-  const email = `${index}.${u.login.username}@${SEED_EMAIL_DOMAIN}`.toLowerCase();
+  const email =
+    `${index}.${u.login.username}@${SEED_EMAIL_DOMAIN}`.toLowerCase();
   const username = usernameFrom(u.login.username, index);
   const gender = u.gender === "male" ? "man" : "woman";
 
@@ -124,7 +129,7 @@ async function seedOne(
     ON CONFLICT DO NOTHING
     RETURNING id
   `;
-  if (!user) return; 
+  if (!user) return;
 
   const loc = randomAuraLocation();
   await sql`
@@ -153,7 +158,10 @@ async function seedOne(
   }
 }
 
-async function runPool<T>(items: T[], worker: (item: T) => Promise<void>): Promise<void> {
+async function runPool<T>(
+  items: T[],
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
   let cursor = 0;
   const runners = Array.from({ length: CONCURRENCY }, async () => {
     while (cursor < items.length) {
@@ -203,15 +211,20 @@ async function main() {
     `;
     const toCreate = target - count;
     if (toCreate <= 0) {
-      console.log(`[seed] ${count} profils de seed déjà présents (cible ${target}), rien à faire.`);
+      console.log(
+        `[seed] ${count} profils de seed déjà présents (cible ${target}), rien à faire.`,
+      );
       return;
     }
-    console.log(`[seed] création de ${toCreate} profils (cible ${target}, existants ${count})…`);
+    console.log(
+      `[seed] création de ${toCreate} profils (cible ${target}, existants ${count})…`,
+    );
 
     const passwordHash = await argon2.hash(SEED_PASSWORD);
     const tags = await sql<{ id: string }[]>`SELECT id FROM tags`;
     const tagIds = tags.map((t) => t.id);
-    if (tagIds.length === 0) throw new Error("Table tags vide : lance d'abord le boot (seedTags).");
+    if (tagIds.length === 0)
+      throw new Error("Table tags vide : lance d'abord le boot (seedTags).");
 
     const users = await fetchRandomUsers(toCreate);
 
@@ -225,7 +238,9 @@ async function main() {
       },
     );
 
-    console.log(`[seed] terminé. Mot de passe commun: "${SEED_PASSWORD}", emails @${SEED_EMAIL_DOMAIN}`);
+    console.log(
+      `[seed] terminé. Mot de passe commun: "${SEED_PASSWORD}", emails @${SEED_EMAIL_DOMAIN}`,
+    );
   } finally {
     await sql.end();
   }

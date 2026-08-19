@@ -9,16 +9,28 @@ export class APIChat extends IAPI {
     return this.fetch<ConversationDTO[]>("GET", Routes.Chat.Conversations);
   }
 
-  history(id: string, limit: number, offset: number): Promise<APIResponse<Paginated<MessageDTO>>> {
-    return this.fetch<Paginated<MessageDTO>>("GET", Routes.Chat.Thread.replace(":id", id), {
-      query: { limit, offset },
-    });
+  history(
+    id: string,
+    limit: number,
+    offset: number,
+  ): Promise<APIResponse<Paginated<MessageDTO>>> {
+    return this.fetch<Paginated<MessageDTO>>(
+      "GET",
+      Routes.Chat.Thread.replace(":id", id),
+      {
+        query: { limit, offset },
+      },
+    );
   }
 
   send(id: string, content: string): Promise<APIResponse<MessageDTO>> {
-    return this.fetch<MessageDTO>("POST", Routes.Chat.Thread.replace(":id", id), {
-      body: { content },
-    });
+    return this.fetch<MessageDTO>(
+      "POST",
+      Routes.Chat.Thread.replace(":id", id),
+      {
+        body: { content },
+      },
+    );
   }
 
   markRead(id: string): Promise<APIResponse<void>> {

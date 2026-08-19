@@ -10,7 +10,10 @@ import { BirthdateField } from "@web/component/fields/BirthdateField";
 import { BioField } from "@web/component/fields/BioField";
 import { TagPicker } from "@web/component/fields/TagPicker";
 import { PhotoManager } from "@web/component/fields/PhotoManager";
-import { LocationField, type LocationValue } from "@web/component/fields/LocationField";
+import {
+  LocationField,
+  type LocationValue,
+} from "@web/component/fields/LocationField";
 import { Button } from "@shadcn/ui/button";
 import { Label } from "@shadcn/ui/label";
 import { cn } from "@shadcn/lib/utils";
@@ -111,7 +114,9 @@ export function OnboardingView() {
   }
 
   function logout() {
-    return loadingWrapper(setLoggingOut, () => API.auth.logout().then(() => $user.set(null)));
+    return loadingWrapper(setLoggingOut, () =>
+      API.auth.logout().then(() => $user.set(null)),
+    );
   }
 
   function finish() {
@@ -150,7 +155,12 @@ export function OnboardingView() {
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col p-4">
       <div className="flex items-center justify-between">
         <span className="text-lg font-semibold">Matcha</span>
-        <Button variant="ghost" size="sm" disabled={loggingOut} onClick={logout}>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={loggingOut}
+          onClick={logout}
+        >
           {loggingOut ? "…" : "Log out"}
         </Button>
       </div>
@@ -185,7 +195,11 @@ export function OnboardingView() {
           </Button>
         )}
         {isLast ? (
-          <Button className="flex-1" disabled={saving || !allValid} onClick={finish}>
+          <Button
+            className="flex-1"
+            disabled={saving || !allValid}
+            onClick={finish}
+          >
             {saving ? "Saving…" : "Finish"}
           </Button>
         ) : (

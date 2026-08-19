@@ -17,8 +17,13 @@ interface ImageCarouselProps {
 
 const SWIPE_THRESHOLD = 40;
 
-
-export function ImageCarousel({ images, overlay, fallback, className, alt = "" }: ImageCarouselProps) {
+export function ImageCarousel({
+  images,
+  overlay,
+  fallback,
+  className,
+  alt = "",
+}: ImageCarouselProps) {
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -55,7 +60,9 @@ export function ImageCarousel({ images, overlay, fallback, className, alt = "" }
       onTouchEnd={onTouchEnd}
     >
       {count === 0 ? (
-        <div className="flex h-full w-full items-center justify-center">{fallback}</div>
+        <div className="flex h-full w-full items-center justify-center">
+          {fallback}
+        </div>
       ) : (
         <div
           className="flex h-full transition-transform duration-300 ease-out"

@@ -36,7 +36,12 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/webp": "webp",
 };
 
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const R = 6371;
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
@@ -64,15 +69,21 @@ export class ProfileService {
     const user = await this.users.findById(userId);
     if (!user) throw new HttpError(404, "User not found");
 
-    const [profile, tags, pictures, likesReceived, visitsReceived, reportsReceived] =
-      await Promise.all([
-        this.profiles.findByUserId(userId),
-        this.tags.findByUserId(userId),
-        this.pictures.findByUserId(userId),
-        this.likes.countReceived(userId),
-        this.visits.countReceived(userId),
-        this.reports.countReceived(userId),
-      ]);
+    const [
+      profile,
+      tags,
+      pictures,
+      likesReceived,
+      visitsReceived,
+      reportsReceived,
+    ] = await Promise.all([
+      this.profiles.findByUserId(userId),
+      this.tags.findByUserId(userId),
+      this.pictures.findByUserId(userId),
+      this.likes.countReceived(userId),
+      this.visits.countReceived(userId),
+      this.reports.countReceived(userId),
+    ]);
 
     return this.transformers.myProfileToDTO(
       { user, profile, tags, pictures },
@@ -81,7 +92,10 @@ export class ProfileService {
     );
   }
 
-  async search(viewerId: string, params: SearchParams): Promise<Paginated<ProfilePreviewDTO>> {
+  async search(
+    viewerId: string,
+    params: SearchParams,
+  ): Promise<Paginated<ProfilePreviewDTO>> {
     const viewer = await this.profiles.findByUserId(viewerId);
     const limit = Math.min(Math.max(params.limit ?? 20, 1), 50);
     const offset = Math.max(params.offset ?? 0, 0);
@@ -106,13 +120,23 @@ export class ProfileService {
     });
 
     const items = rows.map((r) =>
-      this.transformers.profilePreviewToDTO(r, this.presence.isOnline(r.user_id)),
+      this.transformers.profilePreviewToDTO(
+        r,
+        this.presence.isOnline(r.user_id),
+      ),
     );
 
-    return { items, totalCount: total, hasNextPage: offset + rows.length < total };
+    return {
+      items,
+      totalCount: total,
+      hasNextPage: offset + rows.length < total,
+    };
   }
 
-  async getPublicProfile(viewerId: string, targetId: string): Promise<ProfileDTO> {
+  async getPublicProfile(
+    viewerId: string,
+    targetId: string,
+  ): Promise<ProfileDTO> {
     const user = await this.users.findById(targetId);
     if (!user || !user.onboarded) throw new HttpError(404, "Profile not found");
 
@@ -163,13 +187,22 @@ export class ProfileService {
     );
   }
 
-  async updateProfile(userId: string, dto: UpdateProfileDTO): Promise<MyProfileDTO> {
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDTO,
+  ): Promise<MyProfileDTO> {
     const current = await this.profiles.findByUserId(userId);
 
     await this.profiles.upsert(userId, {
       gender: dto.gender !== undefined ? dto.gender : (current?.gender ?? null),
-      sexual_pref: dto.sexualPref !== undefined ? dto.sexualPref : (current?.sexual_pref ?? "bi"),
-      biography: dto.biography !== undefined ? dto.biography : (current?.biography ?? null),
+      sexual_pref:
+        dto.sexualPref !== undefined
+          ? dto.sexualPref
+          : (current?.sexual_pref ?? "bi"),
+      biography:
+        dto.biography !== undefined
+          ? dto.biography
+          : (current?.biography ?? null),
       birthdate:
         dto.birthdate !== undefined
           ? dto.birthdate
@@ -181,7 +214,10 @@ export class ProfileService {
     return this.getMe(userId);
   }
 
-  async updateAccount(userId: string, dto: UpdateAccountDTO): Promise<MyProfileDTO> {
+  async updateAccount(
+    userId: string,
+    dto: UpdateAccountDTO,
+  ): Promise<MyProfileDTO> {
     try {
       await this.users.updateAccount(userId, {
         first_name: dto.firstName,
@@ -189,7 +225,12 @@ export class ProfileService {
         email: dto.email,
       });
     } catch (err) {
-      if (typeof err === "object" && err !== null && "code" in err && err.code === "23505") {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        err.code === "23505"
+      ) {
         throw new HttpError(409, "Email already in use");
       }
       throw err;
@@ -198,11 +239,16 @@ export class ProfileService {
     return this.getMe(userId);
   }
 
-
-  async updateLocation(userId: string, dto: UpdateLocationDTO): Promise<MyProfileDTO> {
+  async updateLocation(
+    userId: string,
+    dto: UpdateLocationDTO,
+  ): Promise<MyProfileDTO> {
     const user = await this.users.findById(userId);
     if (user?.onboarded && (dto.latitude == null || dto.longitude == null)) {
-      throw new HttpError(400, "A location is required — use GPS or pick a city");
+      throw new HttpError(
+        400,
+        "A location is required — use GPS or pick a city",
+      );
     }
 
     await this.profiles.updateLocation(userId, {
@@ -225,8 +271,13 @@ export class ProfileService {
     const missing: string[] = [];
     if (!profile?.gender) missing.push("gender");
     if (!profile?.birthdate) missing.push("birthdate");
-    if (!profile?.biography || profile.biography.trim() === "") missing.push("biography");
-    if (!profile?.city || profile?.latitude == null || profile?.longitude == null)
+    if (!profile?.biography || profile.biography.trim() === "")
+      missing.push("biography");
+    if (
+      !profile?.city ||
+      profile?.latitude == null ||
+      profile?.longitude == null
+    )
       missing.push("location");
     if (tags.length === 0) missing.push("at least one tag");
     if (pictures.length === 0) missing.push("at least one photo");
@@ -247,15 +298,19 @@ export class ProfileService {
 
   async addPhoto(userId: string, dto: AddPhotoDTO): Promise<MyProfileDTO> {
     const count = await this.pictures.countByUserId(userId);
-    if (count >= MAX_PHOTOS) throw new HttpError(400, `Maximum ${MAX_PHOTOS} photos allowed`);
+    if (count >= MAX_PHOTOS)
+      throw new HttpError(400, `Maximum ${MAX_PHOTOS} photos allowed`);
 
-    const match = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(dto.data);
+    const match = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(
+      dto.data,
+    );
     if (!match) throw new HttpError(400, "Unsupported image format");
 
     const [, mime, payload] = match;
     const buffer = Buffer.from(payload, "base64");
     if (buffer.length === 0) throw new HttpError(400, "Empty image");
-    if (buffer.length > MAX_PHOTO_BYTES) throw new HttpError(400, "Image too large (max 5MB)");
+    if (buffer.length > MAX_PHOTO_BYTES)
+      throw new HttpError(400, "Image too large (max 5MB)");
 
     const realMime = detectImageMime(buffer);
     if (realMime === null || realMime !== mime) {
@@ -277,10 +332,12 @@ export class ProfileService {
 
   async deletePhoto(userId: string, pictureId: string): Promise<MyProfileDTO> {
     const picture = await this.pictures.findById(pictureId);
-    if (!picture || picture.user_id !== userId) throw new HttpError(404, "Photo not found");
+    if (!picture || picture.user_id !== userId)
+      throw new HttpError(404, "Photo not found");
 
     const count = await this.pictures.countByUserId(userId);
-    if (count <= 1) throw new HttpError(400, "You must keep at least one photo");
+    if (count <= 1)
+      throw new HttpError(400, "You must keep at least one photo");
 
     await this.pictures.delete(pictureId);
     await unlink(join(env.uploadsDir, picture.filename)).catch(() => {});
@@ -295,9 +352,13 @@ export class ProfileService {
     return this.getMe(userId);
   }
 
-  async setProfilePhoto(userId: string, pictureId: string): Promise<MyProfileDTO> {
+  async setProfilePhoto(
+    userId: string,
+    pictureId: string,
+  ): Promise<MyProfileDTO> {
     const picture = await this.pictures.findById(pictureId);
-    if (!picture || picture.user_id !== userId) throw new HttpError(404, "Photo not found");
+    if (!picture || picture.user_id !== userId)
+      throw new HttpError(404, "Photo not found");
 
     await this.pictures.setProfile(userId, pictureId);
     return this.getMe(userId);

@@ -7,8 +7,19 @@ interface CompactProfileCardProps {
   onClick?: () => void;
 }
 
-export function CompactProfileCard({ profile, onClick }: CompactProfileCardProps) {
-  const { firstName, age, photo, userId, online: fallbackOnline, fame, distance } = profile;
+export function CompactProfileCard({
+  profile,
+  onClick,
+}: CompactProfileCardProps) {
+  const {
+    firstName,
+    age,
+    photo,
+    userId,
+    online: fallbackOnline,
+    fame,
+    distance,
+  } = profile;
   const initials = firstName[0]?.toUpperCase() ?? "?";
 
   const presence = usePresence(userId);
@@ -42,7 +53,9 @@ export function CompactProfileCard({ profile, onClick }: CompactProfileCardProps
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/25 to-transparent p-2.5 pt-8">
         <p className="truncate font-semibold text-white drop-shadow-sm">
           {firstName}
-          {age !== null && <span className="font-normal text-white/85">, {age}</span>}
+          {age !== null && (
+            <span className="font-normal text-white/85">, {age}</span>
+          )}
         </p>
         <div className="mt-0.5 flex items-center gap-2 text-[11px] text-white/85">
           <span className="flex items-center gap-0.5">

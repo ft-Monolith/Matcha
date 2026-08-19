@@ -1,6 +1,10 @@
 import type { HealthDTO } from "@common/dto/health.dto";
 import type { UserDTO } from "@common/dto/user.dto";
-import type { MyProfileDTO, ProfileDTO, ProfilePreviewDTO } from "@common/dto/profile.dto";
+import type {
+  MyProfileDTO,
+  ProfileDTO,
+  ProfilePreviewDTO,
+} from "@common/dto/profile.dto";
 import type { ConversationDTO, MessageDTO } from "@common/dto/chat.dto";
 import type { NotificationDTO } from "@common/dto/notification.dto";
 import type {
@@ -14,7 +18,6 @@ import type { ProfileEntity } from "../../database/entities/profile.entity";
 import type { TagEntity } from "../../database/entities/tag.entity";
 import type { PictureEntity } from "../../database/entities/picture.entity";
 import type { ProfilePreviewRow } from "../../database/repositories/profile.repository";
-
 
 export interface HealthSnapshot {
   dbUp: boolean;
@@ -40,7 +43,15 @@ export class TransformersService {
   }
 
   userToDTO(user: UserEntity): UserDTO {
-    const { id, username, first_name, last_name, email_verified, onboarded, created_at } = user;
+    const {
+      id,
+      username,
+      first_name,
+      last_name,
+      email_verified,
+      onboarded,
+      created_at,
+    } = user;
 
     return {
       id,
@@ -88,7 +99,11 @@ export class TransformersService {
     };
   }
 
-  myProfileToDTO(agg: ProfileAggregate, online: boolean, fame = 0): MyProfileDTO {
+  myProfileToDTO(
+    agg: ProfileAggregate,
+    online: boolean,
+    fame = 0,
+  ): MyProfileDTO {
     return {
       ...this.profileToDTO(agg, online, false, false, fame),
       email: agg.user.email,
@@ -98,7 +113,10 @@ export class TransformersService {
     };
   }
 
-  profilePreviewToDTO(row: ProfilePreviewRow, online: boolean): ProfilePreviewDTO {
+  profilePreviewToDTO(
+    row: ProfilePreviewRow,
+    online: boolean,
+  ): ProfilePreviewDTO {
     return {
       userId: row.user_id,
       firstName: row.first_name,
@@ -106,7 +124,8 @@ export class TransformersService {
       photo: row.photo ? `/uploads/${row.photo}` : null,
       online,
       fame: computeFame(row.likes_count, row.visits_count, row.reports_count),
-      distance: row.distance_km == null ? null : Math.round(row.distance_km * 10) / 10,
+      distance:
+        row.distance_km == null ? null : Math.round(row.distance_km * 10) / 10,
     };
   }
 

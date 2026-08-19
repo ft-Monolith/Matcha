@@ -25,8 +25,10 @@ function parseCookies(header: string | undefined): Record<string, string> {
   return out;
 }
 
-
-export function setupRealtime(httpServer: HttpServer, users: UserRepository): Realtime {
+export function setupRealtime(
+  httpServer: HttpServer,
+  users: UserRepository,
+): Realtime {
   const io = new Server(httpServer, {
     cors: { origin: env.appUrl, credentials: true },
   });
@@ -54,7 +56,9 @@ export function setupRealtime(httpServer: HttpServer, users: UserRepository): Re
 
     socket.on("disconnect", (reason) => {
       void presence.onDisconnect(userId);
-      console.log(`[ws] disconnect user=${userId} socket=${socket.id} (${reason})`);
+      console.log(
+        `[ws] disconnect user=${userId} socket=${socket.id} (${reason})`,
+      );
     });
   });
 

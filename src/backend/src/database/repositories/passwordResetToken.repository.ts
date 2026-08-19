@@ -1,10 +1,13 @@
 import type { Sql } from "../client";
 
-
 export class PasswordResetTokenRepository {
   constructor(private readonly sql: Sql) {}
 
-  async create(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
+  async create(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<void> {
     await this.sql.begin(async (tx) => {
       await tx`DELETE FROM password_reset_tokens WHERE user_id = ${userId}`;
       await tx`

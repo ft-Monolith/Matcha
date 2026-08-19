@@ -8,7 +8,6 @@ import { MailerService } from "../app/services/mailer.service";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 
-
 export interface AuthDeps {
   sql: Sql;
   transformers: TransformersService;
@@ -20,7 +19,13 @@ export function ControllerAuthModule(deps: AuthDeps): Router {
   const resetTokens = new PasswordResetTokenRepository(deps.sql);
   const mailer = new MailerService();
 
-  const service = new AuthService(users, tokens, resetTokens, mailer, deps.transformers);
+  const service = new AuthService(
+    users,
+    tokens,
+    resetTokens,
+    mailer,
+    deps.transformers,
+  );
   const controller = new AuthController(service);
 
   const router = Router();

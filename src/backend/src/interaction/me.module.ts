@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { buildInteractionService, type InteractionDeps } from "./interaction.module";
+import {
+  buildInteractionService,
+  type InteractionDeps,
+} from "./interaction.module";
 import { MeController } from "./me.controller";
 
 export function ControllerMeModule(deps: InteractionDeps): Router {

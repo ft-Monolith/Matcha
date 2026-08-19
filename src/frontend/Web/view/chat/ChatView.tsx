@@ -4,7 +4,12 @@ import { toast } from "sonner";
 import type { ConversationDTO, MessageDTO } from "@common/dto/chat.dto";
 import type { ProfilePreviewDTO } from "@common/dto/profile.dto";
 import { API } from "@web/API/api";
-import { $user, $chatUnread, $openChatUser, $use } from "@web/observables/observables";
+import {
+  $user,
+  $chatUnread,
+  $openChatUser,
+  $use,
+} from "@web/observables/observables";
 import { socket } from "@web/realtime/socket";
 import { loadingWrapper } from "@web/utils/loadingWrapper";
 import { ChevronLeft, Send, MessagesSquare } from "lucide-react";
@@ -34,7 +39,8 @@ export function ChatView() {
   const me = $use($user);
   const myId = me?.id ?? "";
   const location = useLocation();
-  const openUserId = (location.state as { openUserId?: string } | null)?.openUserId;
+  const openUserId = (location.state as { openUserId?: string } | null)
+    ?.openUserId;
   const openedKeyRef = useRef<string | null>(null);
 
   const [conversations, setConversations] = useState<ConversationDTO[]>([]);
@@ -171,7 +177,12 @@ export function ChatView() {
     return (
       <div className="mx-auto flex h-full w-full max-w-md flex-col">
         <div className="flex shrink-0 items-center gap-2 border-b pb-2">
-          <Button variant="ghost" size="icon" aria-label="Back" onClick={closeThread}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Back"
+            onClick={closeThread}
+          >
             <ChevronLeft className="size-5" />
           </Button>
           <button
@@ -180,8 +191,12 @@ export function ChatView() {
             onClick={() => setProfileOpen(selected.userId)}
           >
             <Avatar className="size-10">
-              {selected.photo && <AvatarImage src={selected.photo} alt={selected.firstName} />}
-              <AvatarFallback>{selected.firstName[0]?.toUpperCase() ?? "?"}</AvatarFallback>
+              {selected.photo && (
+                <AvatarImage src={selected.photo} alt={selected.firstName} />
+              )}
+              <AvatarFallback>
+                {selected.firstName[0]?.toUpperCase() ?? "?"}
+              </AvatarFallback>
             </Avatar>
             <PresenceDot
               userId={selected.userId}
@@ -193,12 +208,20 @@ export function ChatView() {
             className="min-w-0 flex-1 text-left"
             onClick={() => setProfileOpen(selected.userId)}
           >
-            <p className="truncate font-semibold leading-tight">{selected.firstName}</p>
-            <PresenceText userId={selected.userId} fallbackOnline={selected.online} />
+            <p className="truncate font-semibold leading-tight">
+              {selected.firstName}
+            </p>
+            <PresenceText
+              userId={selected.userId}
+              fallbackOnline={selected.online}
+            />
           </button>
         </div>
 
-        <ProfileDialog userId={profileOpen} onClose={() => setProfileOpen(null)} />
+        <ProfileDialog
+          userId={profileOpen}
+          onClose={() => setProfileOpen(null)}
+        />
 
         <div
           ref={scrollRef}
@@ -206,7 +229,9 @@ export function ChatView() {
           className="flex-1 space-y-1.5 overflow-y-auto overscroll-contain py-3 scrollbar-none [&::-webkit-scrollbar]:hidden"
         >
           {loadingMore && (
-            <p className="text-muted-foreground py-1 text-center text-xs">Loading…</p>
+            <p className="text-muted-foreground py-1 text-center text-xs">
+              Loading…
+            </p>
           )}
           {messages.length === 0 ? (
             <p className="text-muted-foreground py-8 text-center text-sm">
@@ -225,7 +250,10 @@ export function ChatView() {
                 >
                   {!mine &&
                     (startOfRun ? (
-                      <MessageAvatar src={selected.photo} name={selected.firstName} />
+                      <MessageAvatar
+                        src={selected.photo}
+                        name={selected.firstName}
+                      />
                     ) : (
                       <div className="size-8 shrink-0" />
                     ))}
@@ -283,8 +311,15 @@ export function ChatView() {
                 >
                   <div className="relative shrink-0">
                     <Avatar className="size-12">
-                      {c.user.photo && <AvatarImage src={c.user.photo} alt={c.user.firstName} />}
-                      <AvatarFallback>{c.user.firstName[0]?.toUpperCase() ?? "?"}</AvatarFallback>
+                      {c.user.photo && (
+                        <AvatarImage
+                          src={c.user.photo}
+                          alt={c.user.firstName}
+                        />
+                      )}
+                      <AvatarFallback>
+                        {c.user.firstName[0]?.toUpperCase() ?? "?"}
+                      </AvatarFallback>
                     </Avatar>
                     <PresenceDot
                       userId={c.user.userId}
@@ -294,7 +329,12 @@ export function ChatView() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className={cn("truncate font-medium", unread && "font-semibold")}>
+                      <p
+                        className={cn(
+                          "truncate font-medium",
+                          unread && "font-semibold",
+                        )}
+                      >
                         {c.user.firstName}
                       </p>
                       {c.lastMessage && (
@@ -307,11 +347,14 @@ export function ChatView() {
                       <p
                         className={cn(
                           "truncate text-sm",
-                          unread ? "text-foreground font-medium" : "text-muted-foreground",
+                          unread
+                            ? "text-foreground font-medium"
+                            : "text-muted-foreground",
                         )}
                       >
                         {c.lastMessage
-                          ? (c.lastMessage.senderId === myId ? "You: " : "") + c.lastMessage.content
+                          ? (c.lastMessage.senderId === myId ? "You: " : "") +
+                            c.lastMessage.content
                           : "Say hi 👋"}
                       </p>
                       {unread && (

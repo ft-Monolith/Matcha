@@ -14,7 +14,6 @@ declare global {
   }
 }
 
-
 export function getSession(req: Request): AppSession {
   if (!req.session) {
     throw new HttpError(401, "Not authenticated");

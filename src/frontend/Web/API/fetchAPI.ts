@@ -1,5 +1,3 @@
-
-
 import { Routes } from "@common/routes/routes";
 
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -23,15 +21,12 @@ export interface APISuccess<T> extends APIGenericResponse<T> {
   error: false;
 }
 
-/** En cas d'erreur, `data` porte le message du back */
-export interface APIError extends APIGenericResponse<string | Record<string, Array<string>>> {
+export interface APIError extends APIGenericResponse<
+  string | Record<string, Array<string>>
+> {
   error: true;
 }
 
-/**
- * Union discriminée sur `error`. Après `if (r.error) return;`, TypeScript SAIT que
- * `r.data` est du type T. Impossible d'oublier de traiter le cas d'échec.
- */
 export type APIResponse<T> = APISuccess<T> | APIError;
 
 function formatQuery(query?: object): string {
@@ -39,7 +34,7 @@ function formatQuery(query?: object): string {
 
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value === undefined) continue; // on n'envoie pas les filtres non renseignés
+    if (value === undefined) continue;
     params.append(key, String(value));
   }
 
@@ -52,11 +47,13 @@ async function getBody(res: Response): Promise<unknown> {
   return isJson ? await res.json().catch(() => null) : await res.text();
 }
 
-
 let refreshInFlight: Promise<boolean> | null = null;
 
 function tryRefresh(): Promise<boolean> {
-  refreshInFlight ??= fetch(Routes.Auth.Refresh, { method: "POST", credentials: "include" })
+  refreshInFlight ??= fetch(Routes.Auth.Refresh, {
+    method: "POST",
+    credentials: "include",
+  })
     .then((res) => res.ok)
     .catch(() => false)
     .finally(() => {
@@ -79,10 +76,9 @@ export async function fetchAPI<T>(
       method,
       headers,
       body: args.body ? JSON.stringify(args.body) : undefined,
-      credentials: "include", // envoie les cookies httpOnly (session)
+      credentials: "include",
       signal: args.abort?.signal,
     });
-
 
     if (
       res.status === 401 &&
@@ -102,13 +98,20 @@ export async function fetchAPI<T>(
       if (typeof body === "object" && body !== null) {
         const b = body as { error?: string; details?: unknown };
         if (Array.isArray(b.details) && b.details.length > 0) {
-          message = b.details.filter((d): d is string => typeof d === "string").join(" · ");
+          message = b.details
+            .filter((d): d is string => typeof d === "string")
+            .join(" · ");
         } else if (typeof b.error === "string") {
           message = b.error;
         }
       }
 
-      return { status: res.status, statusText: res.statusText, data: message, error: true };
+      return {
+        status: res.status,
+        statusText: res.statusText,
+        data: message,
+        error: true,
+      };
     }
 
     return {
@@ -118,6 +121,11 @@ export async function fetchAPI<T>(
       error: false,
     };
   } catch {
-    return { status: 0, statusText: "Network Error", data: "Server unreachable", error: true };
+    return {
+      status: 0,
+      statusText: "Network Error",
+      data: "Server unreachable",
+      error: true,
+    };
   }
 }

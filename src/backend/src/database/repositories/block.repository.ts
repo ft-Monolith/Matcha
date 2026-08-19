@@ -32,7 +32,11 @@ export class BlockRepository {
     return rows.length > 0;
   }
 
-  async listBlocked(userId: string, limit: number, offset: number): Promise<ProfilePreviewRow[]> {
+  async listBlocked(
+    userId: string,
+    limit: number,
+    offset: number,
+  ): Promise<ProfilePreviewRow[]> {
     return this.sql<ProfilePreviewRow[]>`
       SELECT
         u.id         AS user_id,

@@ -30,10 +30,12 @@ export class InteractionService {
   }
 
   async like(likerId: string, targetId: string): Promise<InteractionStateDTO> {
-    if (likerId === targetId) throw new HttpError(400, "You cannot like yourself");
+    if (likerId === targetId)
+      throw new HttpError(400, "You cannot like yourself");
 
     const target = await this.users.findById(targetId);
-    if (!target || !target.onboarded) throw new HttpError(404, "Profile not found");
+    if (!target || !target.onboarded)
+      throw new HttpError(404, "Profile not found");
     if (await this.blocks.isBlockedEither(likerId, targetId)) {
       throw new HttpError(403, "Interaction not allowed");
     }
@@ -56,7 +58,10 @@ export class InteractionService {
     return { likedByMe: true, likesMe };
   }
 
-  async unlike(likerId: string, targetId: string): Promise<InteractionStateDTO> {
+  async unlike(
+    likerId: string,
+    targetId: string,
+  ): Promise<InteractionStateDTO> {
     const wasMatched =
       (await this.likes.exists(likerId, targetId)) &&
       (await this.likes.exists(targetId, likerId));
@@ -82,10 +87,17 @@ export class InteractionService {
     ]);
 
     const items = rows.map((r) =>
-      this.transformers.profilePreviewToDTO(r, this.presence.isOnline(r.user_id)),
+      this.transformers.profilePreviewToDTO(
+        r,
+        this.presence.isOnline(r.user_id),
+      ),
     );
 
-    return { items, totalCount, hasNextPage: offset + rows.length < totalCount };
+    return {
+      items,
+      totalCount,
+      hasNextPage: offset + rows.length < totalCount,
+    };
   }
 
   async recordVisit(visitorId: string, visitedId: string): Promise<void> {
@@ -108,14 +120,22 @@ export class InteractionService {
     ]);
 
     const items = rows.map((r) =>
-      this.transformers.profilePreviewToDTO(r, this.presence.isOnline(r.user_id)),
+      this.transformers.profilePreviewToDTO(
+        r,
+        this.presence.isOnline(r.user_id),
+      ),
     );
 
-    return { items, totalCount, hasNextPage: offset + rows.length < totalCount };
+    return {
+      items,
+      totalCount,
+      hasNextPage: offset + rows.length < totalCount,
+    };
   }
 
   async block(blockerId: string, targetId: string): Promise<void> {
-    if (blockerId === targetId) throw new HttpError(400, "You cannot block yourself");
+    if (blockerId === targetId)
+      throw new HttpError(400, "You cannot block yourself");
     const target = await this.users.findById(targetId);
     if (!target) throw new HttpError(404, "Profile not found");
 
@@ -129,7 +149,8 @@ export class InteractionService {
   }
 
   async report(reporterId: string, targetId: string): Promise<void> {
-    if (reporterId === targetId) throw new HttpError(400, "You cannot report yourself");
+    if (reporterId === targetId)
+      throw new HttpError(400, "You cannot report yourself");
     const target = await this.users.findById(targetId);
     if (!target) throw new HttpError(404, "Profile not found");
     await this.reports.add(reporterId, targetId, "fake_account");
@@ -146,9 +167,16 @@ export class InteractionService {
     ]);
 
     const items = rows.map((r) =>
-      this.transformers.profilePreviewToDTO(r, this.presence.isOnline(r.user_id)),
+      this.transformers.profilePreviewToDTO(
+        r,
+        this.presence.isOnline(r.user_id),
+      ),
     );
 
-    return { items, totalCount, hasNextPage: offset + rows.length < totalCount };
+    return {
+      items,
+      totalCount,
+      hasNextPage: offset + rows.length < totalCount,
+    };
   }
 }

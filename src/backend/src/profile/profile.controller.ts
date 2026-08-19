@@ -37,22 +37,39 @@ export class ProfileController {
 
   private updateHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.updateProfile(userId, req.body as UpdateProfileDTO));
+    res
+      .status(200)
+      .json(
+        await this.service.updateProfile(userId, req.body as UpdateProfileDTO),
+      );
   };
 
   private accountHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.updateAccount(userId, req.body as UpdateAccountDTO));
+    res
+      .status(200)
+      .json(
+        await this.service.updateAccount(userId, req.body as UpdateAccountDTO),
+      );
   };
 
   private setTagsHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.setTags(userId, req.body as SetTagsDTO));
+    res
+      .status(200)
+      .json(await this.service.setTags(userId, req.body as SetTagsDTO));
   };
 
   private locationHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.updateLocation(userId, req.body as UpdateLocationDTO));
+    res
+      .status(200)
+      .json(
+        await this.service.updateLocation(
+          userId,
+          req.body as UpdateLocationDTO,
+        ),
+      );
   };
 
   private onboardingHandler = async (req: Request, res: Response) => {
@@ -62,16 +79,22 @@ export class ProfileController {
 
   private addPhotoHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(201).json(await this.service.addPhoto(userId, req.body as AddPhotoDTO));
+    res
+      .status(201)
+      .json(await this.service.addPhoto(userId, req.body as AddPhotoDTO));
   };
 
   private deletePhotoHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.deletePhoto(userId, String(req.params.id)));
+    res
+      .status(200)
+      .json(await this.service.deletePhoto(userId, String(req.params.id)));
   };
 
   private setProfilePhotoHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.setProfilePhoto(userId, String(req.params.id)));
+    res
+      .status(200)
+      .json(await this.service.setProfilePhoto(userId, String(req.params.id)));
   };
 }

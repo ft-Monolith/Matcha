@@ -9,7 +9,9 @@ export class MailerService {
       host: env.smtp.host,
       port: env.smtp.port,
       secure: env.smtp.secure,
-      auth: env.smtp.user ? { user: env.smtp.user, pass: env.smtp.pass } : undefined,
+      auth: env.smtp.user
+        ? { user: env.smtp.user, pass: env.smtp.pass }
+        : undefined,
     });
   }
 

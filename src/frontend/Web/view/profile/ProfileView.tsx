@@ -20,7 +20,8 @@ export function ProfileView() {
     );
   }, []);
 
-  if (error) return <p className="text-destructive text-center text-sm">{error}</p>;
+  if (error)
+    return <p className="text-destructive text-center text-sm">{error}</p>;
 
   if (loading || !profile) {
     return (

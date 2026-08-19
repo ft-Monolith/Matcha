@@ -26,22 +26,39 @@ function getPosition(opts: PositionOptions): Promise<GeolocationPosition> {
 
 async function locate(): Promise<GeolocationPosition> {
   try {
-    return await getPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+    return await getPosition({
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 60000,
+    });
   } catch (err) {
-    if (err && typeof err === "object" && "code" in err && (err as { code: number }).code === 2) {
-      return getPosition({ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      (err as { code: number }).code === 2
+    ) {
+      return getPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      });
     }
     throw err;
   }
 }
 
 function geoErrorMessage(err: unknown): string {
-  const code = err && typeof err === "object" && "code" in err ? (err as { code: number }).code : 0;
-  if (code === 1) return "Location permission denied. Enable it or type your city below.";
-  if (code === 3) return "Location request timed out. Try again or type your city.";
+  const code =
+    err && typeof err === "object" && "code" in err
+      ? (err as { code: number }).code
+      : 0;
+  if (code === 1)
+    return "Location permission denied. Enable it or type your city below.";
+  if (code === 3)
+    return "Location request timed out. Try again or type your city.";
   return "Couldn't determine your location. Try again or type your city.";
 }
-
 
 export function LocationField({ value, onChange }: LocationFieldProps) {
   const [busy, setBusy] = useState(false);
@@ -56,7 +73,8 @@ export function LocationField({ value, onChange }: LocationFieldProps) {
       try {
         const pos = await locate();
         const { latitude, longitude } = pos.coords;
-        const city = (await reverseGeocode(latitude, longitude)) ?? "My location";
+        const city =
+          (await reverseGeocode(latitude, longitude)) ?? "My location";
         setCityInput(city);
         onChange({ latitude, longitude, city, consent: true });
       } catch (err) {
@@ -72,7 +90,12 @@ export function LocationField({ value, onChange }: LocationFieldProps) {
       const geo = await forwardGeocode(q);
       if (geo) {
         setCityInput(geo.city);
-        onChange({ latitude: geo.latitude, longitude: geo.longitude, city: geo.city, consent: false });
+        onChange({
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          city: geo.city,
+          consent: false,
+        });
       } else {
         onChange({ latitude: null, longitude: null, city: q, consent: false });
       }
@@ -104,7 +127,12 @@ export function LocationField({ value, onChange }: LocationFieldProps) {
             }
           }}
         />
-        <Button type="button" variant="secondary" disabled={busy} onClick={search}>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={busy}
+          onClick={search}
+        >
           Search
         </Button>
       </div>
@@ -113,9 +141,17 @@ export function LocationField({ value, onChange }: LocationFieldProps) {
         <div className="flex items-center justify-between gap-2">
           <p className="text-muted-foreground text-sm">
             Selected: <span className="text-foreground">{value.city}</span>
-            {value.consent && <span className="text-muted-foreground"> · GPS</span>}
+            {value.consent && (
+              <span className="text-muted-foreground"> · GPS</span>
+            )}
           </p>
-          <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={clear}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={busy}
+            onClick={clear}
+          >
             Remove location
           </Button>
         </div>

@@ -14,7 +14,11 @@ export class VisitRepository {
     return row?.inserted ?? false;
   }
 
-  async listVisitors(userId: string, limit: number, offset: number): Promise<ProfilePreviewRow[]> {
+  async listVisitors(
+    userId: string,
+    limit: number,
+    offset: number,
+  ): Promise<ProfilePreviewRow[]> {
     return this.sql<ProfilePreviewRow[]>`
       SELECT
         u.id         AS user_id,

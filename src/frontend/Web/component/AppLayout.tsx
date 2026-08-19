@@ -12,7 +12,9 @@ export function AppLayout() {
   const [loggingOut, setLoggingOut] = useState(false);
 
   function logout() {
-    return loadingWrapper(setLoggingOut, () => API.auth.logout().then(() => $user.set(null)));
+    return loadingWrapper(setLoggingOut, () =>
+      API.auth.logout().then(() => $user.set(null)),
+    );
   }
 
   return (
@@ -20,8 +22,17 @@ export function AppLayout() {
       <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
         <span className="text-lg font-semibold">Matcha</span>
         <div className="flex items-center gap-3">
-          {user && <span className="text-muted-foreground text-sm">@{user.username}</span>}
-          <Button variant="outline" size="sm" disabled={loggingOut} onClick={logout}>
+          {user && (
+            <span className="text-muted-foreground text-sm">
+              @{user.username}
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loggingOut}
+            onClick={logout}
+          >
             {loggingOut ? "…" : "Log out"}
           </Button>
         </div>

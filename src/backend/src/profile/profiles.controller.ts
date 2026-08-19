@@ -1,5 +1,9 @@
 import type { Request, Response, Router } from "express";
-import type { SearchParams, SortField, SortOrder } from "@common/dto/search.dto";
+import type {
+  SearchParams,
+  SortField,
+  SortOrder,
+} from "@common/dto/search.dto";
 import type { ProfileService } from "./profile.service";
 import type { InteractionService } from "../interaction/interaction.service";
 import { authGuard } from "../app/middlewares/authGuard";
@@ -7,9 +11,20 @@ import { getSession } from "../app/session";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
-const SORT_FIELDS: SortField[] = ["suggestion", "age", "fame", "distance", "tags"];
+const SORT_FIELDS: SortField[] = [
+  "suggestion",
+  "age",
+  "fame",
+  "distance",
+  "tags",
+];
 
-function clampInt(value: unknown, def: number, min: number, max: number): number {
+function clampInt(
+  value: unknown,
+  def: number,
+  min: number,
+  max: number,
+): number {
   const n = Number(value);
   if (!Number.isFinite(n)) return def;
   return Math.min(Math.max(Math.trunc(n), min), max);
@@ -29,7 +44,10 @@ function parseSearchParams(query: Request["query"]): SearchParams {
     query.order === "asc" || query.order === "desc" ? query.order : undefined;
   const tags =
     typeof query.tags === "string" && query.tags.trim() !== ""
-      ? query.tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean)
+      ? query.tags
+          .split(",")
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean)
       : undefined;
 
   return {
@@ -67,7 +85,9 @@ export class ProfilesController {
 
   private listHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.service.search(userId, parseSearchParams(req.query)));
+    res
+      .status(200)
+      .json(await this.service.search(userId, parseSearchParams(req.query)));
   };
 
   private getByIdHandler = async (req: Request, res: Response) => {
@@ -84,12 +104,16 @@ export class ProfilesController {
 
   private likeHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.interactions.like(userId, String(req.params.id)));
+    res
+      .status(200)
+      .json(await this.interactions.like(userId, String(req.params.id)));
   };
 
   private unlikeHandler = async (req: Request, res: Response) => {
     const { userId } = getSession(req);
-    res.status(200).json(await this.interactions.unlike(userId, String(req.params.id)));
+    res
+      .status(200)
+      .json(await this.interactions.unlike(userId, String(req.params.id)));
   };
 
   private blockHandler = async (req: Request, res: Response) => {

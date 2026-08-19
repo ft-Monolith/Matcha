@@ -6,7 +6,12 @@ import { getSession } from "../app/session";
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
 
-function clampInt(value: unknown, def: number, min: number, max: number): number {
+function clampInt(
+  value: unknown,
+  def: number,
+  min: number,
+  max: number,
+): number {
   const n = Number(value);
   if (!Number.isFinite(n)) return def;
   return Math.min(Math.max(Math.trunc(n), min), max);

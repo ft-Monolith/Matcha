@@ -31,8 +31,11 @@ export function ResetPasswordView() {
         : isCommonPassword(password)
           ? "This password is too common."
           : null;
-    const confErr =
-      !confirm ? "Please confirm your password." : password !== confirm ? "Passwords do not match." : null;
+    const confErr = !confirm
+      ? "Please confirm your password."
+      : password !== confirm
+        ? "Passwords do not match."
+        : null;
 
     setPasswordError(pwdErr);
     setConfirmError(confErr);
@@ -50,14 +53,18 @@ export function ResetPasswordView() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-4">
-        <h1 className="text-center text-2xl font-semibold">Choose a new password</h1>
+        <h1 className="text-center text-2xl font-semibold">
+          Choose a new password
+        </h1>
 
         {!token ? (
           <p className="text-destructive text-center text-sm">
             Invalid or missing reset link. Please request a new one.
           </p>
         ) : done ? (
-          <p className="text-center text-green-600">Password updated! Redirecting to login…</p>
+          <p className="text-center text-green-600">
+            Password updated! Redirecting to login…
+          </p>
         ) : (
           <>
             <div className="space-y-1">
@@ -70,7 +77,9 @@ export function ResetPasswordView() {
                   setPasswordError(null);
                 }}
               />
-              {passwordError && <p className="text-destructive text-xs">{passwordError}</p>}
+              {passwordError && (
+                <p className="text-destructive text-xs">{passwordError}</p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -84,13 +93,17 @@ export function ResetPasswordView() {
                 }}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
               />
-              {confirmError && <p className="text-destructive text-xs">{confirmError}</p>}
+              {confirmError && (
+                <p className="text-destructive text-xs">{confirmError}</p>
+              )}
             </div>
 
             <Button className="w-full" disabled={loading} onClick={submit}>
               {loading ? "…" : "Reset password"}
             </Button>
-            {error && <p className="text-destructive text-center text-sm">{error}</p>}
+            {error && (
+              <p className="text-destructive text-center text-sm">{error}</p>
+            )}
             <div className="text-center">
               <Link to="/" className="text-sm underline">
                 Back to login

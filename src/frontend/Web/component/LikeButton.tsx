@@ -31,7 +31,11 @@ export function LikeButton({ profile, onChange, round }: LikeButtonProps) {
   }
 
   if (round) {
-    const title = matched ? "Matched · click to unlike" : liked ? "Click to unlike" : "Like";
+    const title = matched
+      ? "Matched · click to unlike"
+      : liked
+        ? "Click to unlike"
+        : "Like";
     return (
       <Button
         size="icon"

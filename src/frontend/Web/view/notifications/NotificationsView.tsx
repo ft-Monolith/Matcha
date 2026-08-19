@@ -10,7 +10,10 @@ import {
   BellOff,
   type LucideIcon,
 } from "lucide-react";
-import type { NotificationDTO, NotificationType } from "@common/dto/notification.dto";
+import type {
+  NotificationDTO,
+  NotificationType,
+} from "@common/dto/notification.dto";
 import { API } from "@web/API/api";
 import { $notifUnread } from "@web/observables/observables";
 import { socket } from "@web/realtime/socket";
@@ -25,7 +28,10 @@ import { cn } from "@shadcn/lib/utils";
 
 const PAGE_SIZE = 20;
 
-const TYPE_META: Record<NotificationType, { icon: LucideIcon; className: string }> = {
+const TYPE_META: Record<
+  NotificationType,
+  { icon: LucideIcon; className: string }
+> = {
   match: { icon: Sparkles, className: "bg-green-600" },
   like: { icon: Heart, className: "bg-rose-500" },
   visit: { icon: Eye, className: "bg-sky-500" },
@@ -75,12 +81,11 @@ export function NotificationsView() {
     });
   }, [loadPage]);
 
-
   useEffect(() => {
     const onNotif = (n: NotificationDTO) => {
       setItems((prev) => {
         if (prev.some((x) => x.id === n.id)) return prev;
-        offsetRef.current += 1; 
+        offsetRef.current += 1;
         return [{ ...n, read: true }, ...prev];
       });
       $notifUnread.set(0);
@@ -154,8 +159,15 @@ export function NotificationsView() {
               >
                 <div className="relative shrink-0">
                   <Avatar className="size-11">
-                    {n.actor.photo && <AvatarImage src={n.actor.photo} alt={n.actor.firstName} />}
-                    <AvatarFallback>{n.actor.firstName[0]?.toUpperCase() ?? "?"}</AvatarFallback>
+                    {n.actor.photo && (
+                      <AvatarImage
+                        src={n.actor.photo}
+                        alt={n.actor.firstName}
+                      />
+                    )}
+                    <AvatarFallback>
+                      {n.actor.firstName[0]?.toUpperCase() ?? "?"}
+                    </AvatarFallback>
                   </Avatar>
                   <span
                     className={cn(
@@ -169,10 +181,14 @@ export function NotificationsView() {
 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-snug">{notificationText(n)}</p>
-                  <p className="text-muted-foreground text-xs">{relativeTime(n.createdAt)}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {relativeTime(n.createdAt)}
+                  </p>
                 </div>
 
-                {!n.read && <span className="bg-primary size-2 shrink-0 rounded-full" />}
+                {!n.read && (
+                  <span className="bg-primary size-2 shrink-0 rounded-full" />
+                )}
                 {actionable && (
                   <ChevronRight className="text-muted-foreground/40 group-hover:text-muted-foreground size-4 shrink-0 transition-colors" />
                 )}

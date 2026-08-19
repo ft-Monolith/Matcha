@@ -12,7 +12,10 @@ import { BirthdateField } from "@web/component/fields/BirthdateField";
 import { BioField } from "@web/component/fields/BioField";
 import { TagPicker } from "@web/component/fields/TagPicker";
 import { PhotoManager } from "@web/component/fields/PhotoManager";
-import { LocationField, type LocationValue } from "@web/component/fields/LocationField";
+import {
+  LocationField,
+  type LocationValue,
+} from "@web/component/fields/LocationField";
 import { Button } from "@shadcn/ui/button";
 import { Input } from "@shadcn/ui/input";
 import { Label } from "@shadcn/ui/label";
@@ -89,7 +92,10 @@ export function EditProfileDialog({
     firstName !== profile.firstName ||
     lastName !== profile.lastName ||
     email !== profile.email;
-  const tagsDirty = !sameTags(tags, profile.tags.map((t) => t.name));
+  const tagsDirty = !sameTags(
+    tags,
+    profile.tags.map((t) => t.name),
+  );
   const locationDirty =
     location.latitude !== profile.latitude ||
     location.longitude !== profile.longitude ||
@@ -104,12 +110,21 @@ export function EditProfileDialog({
       let latest: MyProfileDTO | null = null;
 
       if (profileDirty) {
-        const r = await API.profile.updateProfile({ gender, sexualPref: pref, biography: bio, birthdate });
+        const r = await API.profile.updateProfile({
+          gender,
+          sexualPref: pref,
+          biography: bio,
+          birthdate,
+        });
         if (r.error) return toast.error(String(r.data));
         latest = r.data;
       }
       if (accountDirty) {
-        const r = await API.profile.updateAccount({ firstName, lastName, email });
+        const r = await API.profile.updateAccount({
+          firstName,
+          lastName,
+          email,
+        });
         if (r.error) return toast.error(String(r.data));
         latest = r.data;
       }
@@ -144,79 +159,104 @@ export function EditProfileDialog({
           setOpen(o);
         }}
       >
-      <DialogTrigger asChild>
-        <Button className="h-11 w-full rounded-xl text-base font-semibold shadow-sm">
-          <Pencil className="size-4" />
-          Edit profile
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden bg-white p-0 sm:max-w-xl">
-        <DialogHeader className="border-b px-6 py-4">
-          <DialogTitle>Edit profile</DialogTitle>
-        </DialogHeader>
-
-        <div className="flex-1 space-y-7 overflow-y-auto overscroll-contain px-6 py-5">
-          <Section title="Photos">
-            <PhotoManager pictures={profile.pictures} onChange={onChange} />
-          </Section>
-
-          <Section title="About you">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Gender">
-                <GenderSelect value={gender} onChange={setGender} />
-              </Field>
-              <Field label="Sexual preference">
-                <SexualPrefSelect value={pref} onChange={setPref} />
-              </Field>
-            </div>
-            <Field label="Birthdate">
-              <BirthdateField value={birthdate} onChange={setBirthdate} />
-            </Field>
-            <Field label="Biography">
-              <BioField value={bio} onChange={setBio} />
-            </Field>
-            <Field label="Interests">
-              <TagPicker value={tags} onChange={setTags} />
-            </Field>
-          </Section>
-
-          <Section title="Account">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="First name">
-                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              </Field>
-              <Field label="Last name">
-                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              </Field>
-            </div>
-            <Field label="Email">
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </Field>
-          </Section>
-
-          <Section title="Location">
-            <LocationField value={location} onChange={setLocation} />
-            {!locationValid && (
-              <p className="text-destructive text-xs">
-                A location is required — set it via GPS or pick a city.
-              </p>
-            )}
-          </Section>
-        </div>
-
-        <DialogFooter className="border-t px-6 py-4">
-          <Button onClick={save} disabled={saving || !dirty || !locationValid}>
-            {saving ? "Saving…" : "Save"}
+        <DialogTrigger asChild>
+          <Button className="h-11 w-full rounded-xl text-base font-semibold shadow-sm">
+            <Pencil className="size-4" />
+            Edit profile
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </DialogTrigger>
+
+        <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden bg-white p-0 sm:max-w-xl">
+          <DialogHeader className="border-b px-6 py-4">
+            <DialogTitle>Edit profile</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 space-y-7 overflow-y-auto overscroll-contain px-6 py-5">
+            <Section title="Photos">
+              <PhotoManager pictures={profile.pictures} onChange={onChange} />
+            </Section>
+
+            <Section title="About you">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Gender">
+                  <GenderSelect value={gender} onChange={setGender} />
+                </Field>
+                <Field label="Sexual preference">
+                  <SexualPrefSelect value={pref} onChange={setPref} />
+                </Field>
+              </div>
+              <Field label="Birthdate">
+                <BirthdateField value={birthdate} onChange={setBirthdate} />
+              </Field>
+              <Field label="Biography">
+                <BioField value={bio} onChange={setBio} />
+              </Field>
+              <Field label="Interests">
+                <TagPicker value={tags} onChange={setTags} />
+              </Field>
+            </Section>
+
+            <Section title="Account">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="First name">
+                  <Input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </Field>
+                <Field label="Last name">
+                  <Input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </Field>
+              </div>
+              <Field label="Email">
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+            </Section>
+
+            <Section title="Location">
+              <LocationField value={location} onChange={setLocation} />
+              {!locationValid && (
+                <p className="text-destructive text-xs">
+                  A location is required — set it via GPS or pick a city.
+                </p>
+              )}
+            </Section>
+          </div>
+
+          <DialogFooter className="border-t px-6 py-4">
+            <Button
+              onClick={save}
+              disabled={saving || !dirty || !locationValid}
+            >
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       <div className="grid grid-cols-3 gap-2">
-        <NavTile icon={Eye} label="Views" onClick={() => navigate(WebRoutes.Visits)} />
-        <NavTile icon={Heart} label="Likes" onClick={() => navigate(WebRoutes.Likes)} />
-        <NavTile icon={Ban} label="Blocked" onClick={() => navigate(WebRoutes.Blocked)} />
+        <NavTile
+          icon={Eye}
+          label="Views"
+          onClick={() => navigate(WebRoutes.Visits)}
+        />
+        <NavTile
+          icon={Heart}
+          label="Likes"
+          onClick={() => navigate(WebRoutes.Likes)}
+        />
+        <NavTile
+          icon={Ban}
+          label="Blocked"
+          onClick={() => navigate(WebRoutes.Blocked)}
+        />
       </div>
     </div>
   );

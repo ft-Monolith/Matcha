@@ -10,7 +10,8 @@ export const MAX_AGE = 100;
 function computeAge(birth: Date, ref: Date): number {
   let age = ref.getFullYear() - birth.getFullYear();
   const monthDiff = ref.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && ref.getDate() < birth.getDate())) age--;
+  if (monthDiff < 0 || (monthDiff === 0 && ref.getDate() < birth.getDate()))
+    age--;
   return age;
 }
 

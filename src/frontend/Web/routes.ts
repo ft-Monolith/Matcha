@@ -14,7 +14,3 @@ export const WebRoutes = {
   VerifyEmail: "/verify-email",
   ResetPassword: "/reset-password",
 } as const;
-
-export function userPath(id: string | number): string {
-  return `/users/${id}`;
-}

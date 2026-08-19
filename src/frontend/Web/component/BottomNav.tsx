@@ -5,10 +5,20 @@ import { $notifUnread, $chatUnread, $use } from "@web/observables/observables";
 import { cn } from "@shadcn/lib/utils";
 
 const items = [
-  { to: WebRoutes.Chat, icon: MessageCircle, label: "Chat", badge: "chat" as const },
+  {
+    to: WebRoutes.Chat,
+    icon: MessageCircle,
+    label: "Chat",
+    badge: "chat" as const,
+  },
   { to: WebRoutes.Search, icon: Search, label: "Search", badge: null },
   { to: WebRoutes.Browse, icon: Compass, label: "Browse", badge: null },
-  { to: WebRoutes.Notifications, icon: Bell, label: "Alerts", badge: "notif" as const },
+  {
+    to: WebRoutes.Notifications,
+    icon: Bell,
+    label: "Alerts",
+    badge: "notif" as const,
+  },
   { to: WebRoutes.Profile, icon: User, label: "Profile", badge: null },
 ];
 
@@ -35,7 +45,9 @@ export function BottomNav() {
               className={({ isActive }) =>
                 cn(
                   "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )
               }
             >

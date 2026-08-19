@@ -58,7 +58,11 @@ export function BlockedView() {
   }
 
   if (items.length === 0) {
-    return <p className="text-muted-foreground text-center text-sm">You haven't blocked anyone.</p>;
+    return (
+      <p className="text-muted-foreground text-center text-sm">
+        You haven't blocked anyone.
+      </p>
+    );
   }
 
   return (

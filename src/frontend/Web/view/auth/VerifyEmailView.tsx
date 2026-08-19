@@ -35,7 +35,9 @@ export function VerifyEmailView() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-4 text-center">
         <h1 className="text-2xl font-semibold">Email verification</h1>
-        {status === "loading" && <p className="text-muted-foreground">Verifying…</p>}
+        {status === "loading" && (
+          <p className="text-muted-foreground">Verifying…</p>
+        )}
         {status === "ok" && <p className="text-green-600">{message}</p>}
         {status === "error" && <p className="text-destructive">{message}</p>}
         <Link to="/" className="text-sm underline">

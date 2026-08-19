@@ -28,7 +28,11 @@ export interface ConversationRow {
 export class MessageRepository {
   constructor(private readonly sql: Sql) {}
 
-  async create(senderId: string, recipientId: string, content: string): Promise<MessageRow> {
+  async create(
+    senderId: string,
+    recipientId: string,
+    content: string,
+  ): Promise<MessageRow> {
     const [row] = await this.sql<MessageRow[]>`
       INSERT INTO messages (sender_id, recipient_id, content)
       VALUES (${senderId}, ${recipientId}, ${content})
@@ -37,7 +41,12 @@ export class MessageRepository {
     return row;
   }
 
-  async history(a: string, b: string, limit: number, offset: number): Promise<MessageRow[]> {
+  async history(
+    a: string,
+    b: string,
+    limit: number,
+    offset: number,
+  ): Promise<MessageRow[]> {
     return this.sql<MessageRow[]>`
       SELECT * FROM messages
       WHERE (sender_id = ${a} AND recipient_id = ${b})

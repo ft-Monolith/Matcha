@@ -2,8 +2,8 @@ import type { NextFunction, Request, Response } from "express";
 import { HttpError } from "../http-error";
 
 interface RateLimitOptions {
-  windowMs: number; 
-  max: number; 
+  windowMs: number;
+  max: number;
   message?: string;
 }
 
@@ -12,9 +12,12 @@ interface Bucket {
   resetAt: number;
 }
 
-
 export function rateLimit(options: RateLimitOptions) {
-  const { windowMs, max, message = "Too many requests, please try again later" } = options;
+  const {
+    windowMs,
+    max,
+    message = "Too many requests, please try again later",
+  } = options;
   const buckets = new Map<string, Bucket>();
 
   return (req: Request, _res: Response, next: NextFunction) => {

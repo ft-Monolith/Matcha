@@ -1,7 +1,6 @@
 import type { Server } from "socket.io";
 import type { UserRepository } from "../../database/repositories/user.repository";
 
-
 export class PresenceService {
   private readonly counts = new Map<string, number>();
 
@@ -28,10 +27,18 @@ export class PresenceService {
     }
     this.counts.delete(userId);
     const lastSeen = await this.users.touchLastSeen(userId);
-    this.broadcast(userId, false, lastSeen ? lastSeen.toISOString() : new Date().toISOString());
+    this.broadcast(
+      userId,
+      false,
+      lastSeen ? lastSeen.toISOString() : new Date().toISOString(),
+    );
   }
 
-  private broadcast(userId: string, online: boolean, lastSeen: string | null): void {
+  private broadcast(
+    userId: string,
+    online: boolean,
+    lastSeen: string | null,
+  ): void {
     this.io.emit("presence", { userId, online, lastSeen });
   }
 }

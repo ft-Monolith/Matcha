@@ -14,10 +14,13 @@ const SEARCH_FILTERS: ProfileFiltersValue = { ...EMPTY_FILTERS, sort: "fame" };
 
 export function SearchView() {
   const [draft, setDraft] = useState<ProfileFiltersValue>(SEARCH_FILTERS);
-  const [applied, setApplied] = useState<SearchParams>(toSearchParams(SEARCH_FILTERS));
+  const [applied, setApplied] = useState<SearchParams>(
+    toSearchParams(SEARCH_FILTERS),
+  );
 
   const fetchPage = useCallback(
-    (limit: number, offset: number) => API.profiles.search({ ...applied, limit, offset }),
+    (limit: number, offset: number) =>
+      API.profiles.search({ ...applied, limit, offset }),
     [applied],
   );
 
@@ -36,7 +39,10 @@ export function SearchView() {
         onReset={reset}
       />
 
-      <ProfileList fetchPage={fetchPage} emptyMessage="No profiles match your search." />
+      <ProfileList
+        fetchPage={fetchPage}
+        emptyMessage="No profiles match your search."
+      />
     </div>
   );
 }

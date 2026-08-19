@@ -14,7 +14,11 @@ export interface NotificationRow {
 export class NotificationRepository {
   constructor(private readonly sql: Sql) {}
 
-  async create(userId: string, type: NotificationType, actorId: string): Promise<NotificationRow> {
+  async create(
+    userId: string,
+    type: NotificationType,
+    actorId: string,
+  ): Promise<NotificationRow> {
     const [row] = await this.sql<NotificationRow[]>`
       WITH inserted AS (
         INSERT INTO notifications (user_id, type, actor_id)
@@ -32,7 +36,11 @@ export class NotificationRepository {
     return row;
   }
 
-  async list(userId: string, limit: number, offset: number): Promise<NotificationRow[]> {
+  async list(
+    userId: string,
+    limit: number,
+    offset: number,
+  ): Promise<NotificationRow[]> {
     return this.sql<NotificationRow[]>`
       SELECT
         n.id, n.type, n.actor_id, n.read_at, n.created_at,

@@ -5,9 +5,6 @@ export interface APIOptions {
   abort?: AbortController;
 }
 
-/**
- classe de base des sous-API permet l heritage de la fonction fetch
- */
 export abstract class IAPI {
   protected fetch<T>(
     method: Method,
