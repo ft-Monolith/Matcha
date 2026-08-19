@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, Flag, Ban, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from "react";
+import { ArrowLeft, Flag, Ban, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import type { ProfileDTO, ProfilePreviewDTO } from "@common/dto/profile.dto";
 import type { Paginated } from "@common/dto/pagination.dto";
@@ -10,6 +10,7 @@ import { ProfileCard } from "@web/component/ProfileCard";
 import { LikeButton } from "@web/component/LikeButton";
 import { Button } from "@shadcn/ui/button";
 import { Skeleton } from "@shadcn/ui/skeleton";
+import { cn } from "@shadcn/lib/utils";
 
 const PAGE_SIZE = 20;
 /** On recharge une page dès qu'il reste moins de cartes que ça devant nous. */
@@ -38,6 +39,8 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
   const [cardLoading, setCardLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Sens de l'animation de sortie en cours, null si la carte est au repos. */
+  const [exit, setExit] = useState<"like" | "next" | null>(null);
 
   const offsetRef = useRef(0);
   const inFlightRef = useRef(false);
@@ -77,22 +80,25 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
   // relancerait l'effet à chaque rendu.
   const currentId = queue[index]?.userId ?? null;
 
-  useEffect(() => {
+  // useLayoutEffect : s'exécute AVANT que le navigateur peigne. Avec un useEffect
+  // classique, l'ancienne carte resterait affichée une image de plus.
+  useLayoutEffect(() => {
     if (!currentId) {
       setProfile(null);
       return;
     }
-    setError(null);
-
-    // Déjà préchargé : on affiche sans passer par l'état de chargement,
-    // sinon un squelette clignoterait à chaque carte.
     const cached = cacheRef.current.get(currentId);
     if (cached) {
       setProfile(cached);
-      return;
+      setError(null);
     }
+  }, [currentId]);
 
+  /** Profil pas encore en cache : on le charge (squelette le temps de la requête). */
+  useEffect(() => {
+    if (!currentId || cacheRef.current.has(currentId)) return;
     setProfile(null);
+    setError(null);
     loadingWrapper(setCardLoading, () =>
       API.profiles.getById(currentId).then((r) => {
         if (r.error) return setError(String(r.data));
@@ -121,12 +127,25 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
     setIndex((i) => i + 1);
   }
 
+  /** Lance l'animation de sortie ; la carte suivante s'affiche à la fin. */
+  function advance(kind: "like" | "next") {
+    if (exit) return; // un double-clic ne doit pas sauter deux profils
+    setExit(kind);
+  }
+
+  function handleExited(e: TransitionEvent<HTMLDivElement>) {
+    if (!exit) return; // la transition retour ne doit pas rejouer next()
+    if (e.propertyName !== "opacity" || e.target !== e.currentTarget) return;
+    setExit(null);
+    next();
+  }
+
   function block(id: string) {
     return loadingWrapper(setBusy, async () => {
       const r = await API.profiles.block(id);
       if (r.error) return toast.error(String(r.data));
       toast.success("Profile blocked");
-      next();
+      advance("next");
     });
   }
 
@@ -183,13 +202,35 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col">
+    <div className="mx-auto h-full w-full max-w-md overflow-hidden">
+      <div
+        key={profile.userId}
+        className={cn(
+          "h-full transition-all duration-200 ease-out",
+          exit === "like" && "translate-x-[115%] rotate-3 opacity-0",
+          exit === "next" && "-translate-x-[115%] -rotate-3 opacity-0",
+        )}
+        onTransitionEnd={handleExited}
+      >
+      <div className="animate-in fade-in zoom-in-95 h-full duration-200">
       <ProfileCard
         fill
         profile={profile}
         actions={
           <>
             <div className="flex items-center justify-center gap-8 pt-1">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => advance("next")}
+                disabled={busy || exit !== null}
+                title="Next profile"
+                aria-label="Next profile"
+                className="size-14 rounded-full border-2 shadow-sm transition-transform hover:scale-105 active:scale-95"
+              >
+                <ArrowLeft className="size-6" />
+              </Button>
+
               <LikeButton
                 round
                 profile={profile}
@@ -197,21 +238,11 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
                   const updated = { ...profile, ...state };
                   cacheRef.current.set(profile.userId, updated);
                   setProfile(updated);
-                  if (state.likedByMe) next();
+                  // On avance dans les deux cas : liker comme retirer son like
+                  // sont des décisions prises, on passe à la suite.
+                  advance(state.likedByMe ? "like" : "next");
                 }}
               />
-
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={next}
-                disabled={busy}
-                title="Next profile"
-                aria-label="Next profile"
-                className="size-14 rounded-full border-2 shadow-sm transition-transform hover:scale-105 active:scale-95"
-              >
-                <ArrowRight className="size-6" />
-              </Button>
             </div>
 
             <div className="flex items-center justify-center gap-1 pt-1">
@@ -219,7 +250,7 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-foreground gap-1.5"
-                disabled={busy}
+                disabled={busy || exit !== null}
                 onClick={() => report(profile.userId)}
               >
                 <Flag className="size-4" />
@@ -230,7 +261,7 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-destructive gap-1.5"
-                disabled={busy}
+                disabled={busy || exit !== null}
                 onClick={() => block(profile.userId)}
               >
                 <Ban className="size-4" />
@@ -240,6 +271,8 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
           </>
         }
       />
+      </div>
+      </div>
     </div>
   );
 }
