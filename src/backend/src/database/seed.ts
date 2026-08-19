@@ -8,6 +8,6 @@ export async function seedTags(sql: Sql): Promise<void> {
     ON CONFLICT (name) DO NOTHING
   `;
   console.log(
-    `[seed] ${PREDEFINED_TAGS.length} tag(s) prédéfini(s) assurés en base.`,
+    `[seed] ${PREDEFINED_TAGS.length} tag(s)created`,
   );
 }

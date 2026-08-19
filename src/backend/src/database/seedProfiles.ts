@@ -194,7 +194,7 @@ async function relocate(sql: Sql): Promise<void> {
       WHERE user_id = ${user_id}
     `;
   });
-  console.log("[seed] relocalisation terminée.");
+  console.log("[seed] relocation over.");
 }
 
 async function main() {
@@ -219,19 +219,19 @@ async function main() {
     const toCreate = target - count;
     if (toCreate <= 0) {
       console.log(
-        `[seed] ${count} profils de seed déjà présents (cible ${target}), rien à faire.`,
+        `[seed] ${count} profiles created`,
       );
       return;
     }
     console.log(
-      `[seed] création de ${toCreate} profils (cible ${target}, existants ${count})…`,
+      `[seed] profile to ${toCreate} ${target} ${count})…`,
     );
 
     const passwordHash = await argon2.hash(SEED_PASSWORD);
     const tags = await sql<{ id: string }[]>`SELECT id FROM tags`;
     const tagIds = tags.map((t) => t.id);
     if (tagIds.length === 0)
-      throw new Error("Table tags vide : lance d'abord le boot (seedTags).");
+      throw new Error("tags table is empty, run seedTags() first");
 
     const users = await fetchRandomUsers(toCreate);
 
@@ -246,7 +246,7 @@ async function main() {
     );
 
     console.log(
-      `[seed] terminé. Mot de passe commun: "${SEED_PASSWORD}", emails @${SEED_EMAIL_DOMAIN}`,
+      `[seed] over ${done} profiles created`,
     );
   } finally {
     await sql.end();
