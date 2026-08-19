@@ -14,7 +14,7 @@ import {
   MaxLength,
   Min,
 } from "class-validator";
-import { PREDEFINED_TAGS } from "../constant/tags";
+import { PREDEFINED_TAGS, MAX_TAGS } from "../constant/tags";
 import { IsValidBirthdate } from "../utils/age_rules";
 import { GENDERS, SEXUAL_PREFS, type Gender, type SexualPref } from "../constant/profile";
 
@@ -105,7 +105,7 @@ export class UpdateAccountDTO {
 
 export class SetTagsDTO {
   @IsArray()
-  @ArrayMaxSize(PREDEFINED_TAGS.length)
+  @ArrayMaxSize(MAX_TAGS, { message: `You can select up to ${MAX_TAGS} tags` })
   @IsIn(PREDEFINED_TAGS, { each: true, message: "Unknown tag" })
   tags!: string[];
 }

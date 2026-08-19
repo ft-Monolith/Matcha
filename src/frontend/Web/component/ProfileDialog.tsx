@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { Flag, Ban } from "lucide-react";
 import { toast } from "sonner";
 import type { ProfileDTO } from "@common/dto/profile.dto";
 import { API } from "@web/API/api";
@@ -55,34 +56,42 @@ export function ProfileDialog({ userId, onClose, onBlocked, actions }: ProfileDi
 
   return (
     <Dialog open={userId !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="max-h-[90vh] overflow-y-auto overscroll-contain bg-white">
         {error && <p className="text-destructive text-center text-sm">{error}</p>}
         {(loading || !profile) && !error && <Skeleton className="h-96 w-full rounded-xl" />}
         {profile && (
           <ProfileCard
             profile={profile}
+            floatingAction={
+              <LikeButton
+                round
+                profile={profile}
+                onChange={(state) => setProfile({ ...profile, ...state })}
+              />
+            }
             actions={
               <>
-                <LikeButton
-                  profile={profile}
-                  onChange={(state) => setProfile({ ...profile, ...state })}
-                />
                 {actions?.(profile)}
-                <div className="flex gap-2">
+                <div className="flex items-center justify-center gap-1 pt-1">
                   <Button
-                    variant="outline"
-                    className="flex-1"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-foreground gap-1.5"
                     disabled={busy}
                     onClick={() => report(profile.userId)}
                   >
+                    <Flag className="size-4" />
                     Report
                   </Button>
+                  <span className="text-muted-foreground/40">·</span>
                   <Button
-                    variant="destructive"
-                    className="flex-1"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive gap-1.5"
                     disabled={busy}
                     onClick={() => block(profile.userId)}
                   >
+                    <Ban className="size-4" />
                     Block
                   </Button>
                 </div>

@@ -32,3 +32,5 @@ export const PREDEFINED_TAGS = [
 ] as const;
 
 export type PredefinedTag = (typeof PREDEFINED_TAGS)[number];
+
+export const MAX_TAGS = 8;

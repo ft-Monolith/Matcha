@@ -27,7 +27,7 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6">
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6">
         <Outlet />
       </main>
 

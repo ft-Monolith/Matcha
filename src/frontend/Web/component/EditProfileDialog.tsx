@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { Pencil, Eye, Heart, Ban } from "lucide-react";
 import { toast } from "sonner";
 import type { Gender, MyProfileDTO, SexualPref } from "@common/dto/profile.dto";
 import { API } from "@web/API/api";
@@ -134,16 +135,7 @@ export function EditProfileDialog({
   }
 
   return (
-    <>
-      <Button variant="outline" onClick={() => navigate(WebRoutes.Visits)}>
-        Who see my profile?
-      </Button>
-      <Button variant="outline" onClick={() => navigate(WebRoutes.Likes)}>
-        Who like my profile?
-      </Button>
-      <Button variant="outline" onClick={() => navigate(WebRoutes.Blocked)}>
-        Blocked users
-      </Button>
+    <div className="flex w-full flex-col gap-3">
       <Dialog
         open={open}
         onOpenChange={(o) => {
@@ -152,84 +144,115 @@ export function EditProfileDialog({
         }}
       >
       <DialogTrigger asChild>
-        <Button variant="outline">Edit profile</Button>
+        <Button className="h-11 w-full rounded-xl text-base font-semibold shadow-sm">
+          <Pencil className="size-4" />
+          Edit profile
+        </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-h-[90vh] overflow-y-auto bg-white">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden bg-white p-0 sm:max-w-xl">
+        <DialogHeader className="border-b px-6 py-4">
           <DialogTitle>Edit profile</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 bg-white">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label>First name</Label>
-              <Input
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Last name</Label>
-              <Input
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <Label>Email</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Gender</Label>
-            <GenderSelect value={gender} onChange={setGender} />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Sexual preference</Label>
-            <SexualPrefSelect value={pref} onChange={setPref} />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Birthdate</Label>
-            <BirthdateField value={birthdate} onChange={setBirthdate} />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Biography</Label>
-            <BioField value={bio} onChange={setBio} />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Interests</Label>
-            <TagPicker value={tags} onChange={setTags} />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Location</Label>
-            <LocationField value={location} onChange={setLocation} />
-          </div>
-
-          <div className="space-y-1">
-            <Label>Photos</Label>
+        <div className="flex-1 space-y-7 overflow-y-auto overscroll-contain px-6 py-5">
+          <Section title="Photos">
             <PhotoManager pictures={profile.pictures} onChange={onChange} />
-          </div>
+          </Section>
+
+          <Section title="About you">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Gender">
+                <GenderSelect value={gender} onChange={setGender} />
+              </Field>
+              <Field label="Sexual preference">
+                <SexualPrefSelect value={pref} onChange={setPref} />
+              </Field>
+            </div>
+            <Field label="Birthdate">
+              <BirthdateField value={birthdate} onChange={setBirthdate} />
+            </Field>
+            <Field label="Biography">
+              <BioField value={bio} onChange={setBio} />
+            </Field>
+            <Field label="Interests">
+              <TagPicker value={tags} onChange={setTags} />
+            </Field>
+          </Section>
+
+          <Section title="Account">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="First name">
+                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              </Field>
+              <Field label="Last name">
+                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </Field>
+            </div>
+            <Field label="Email">
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </Field>
+          </Section>
+
+          <Section title="Location">
+            <LocationField value={location} onChange={setLocation} />
+          </Section>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="border-t px-6 py-4">
           <Button onClick={save} disabled={saving || !dirty}>
             {saving ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
       </Dialog>
-    </>
+
+      <div className="grid grid-cols-3 gap-2">
+        <NavTile icon={Eye} label="Views" onClick={() => navigate(WebRoutes.Visits)} />
+        <NavTile icon={Heart} label="Likes" onClick={() => navigate(WebRoutes.Likes)} />
+        <NavTile icon={Ban} label="Blocked" onClick={() => navigate(WebRoutes.Blocked)} />
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function NavTile({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Eye;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      variant="outline"
+      onClick={onClick}
+      className="h-auto flex-col gap-1.5 rounded-xl py-3"
+    >
+      <Icon className="text-muted-foreground size-5" />
+      <span className="text-xs font-normal">{label}</span>
+    </Button>
   );
 }
