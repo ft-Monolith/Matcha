@@ -9,6 +9,7 @@ import {
 import type { ProfileService } from "./profile.service";
 import { validate } from "../app/middlewares/validate";
 import { authGuard } from "../app/middlewares/authGuard";
+import { uuidParam } from "../app/middlewares/uuidParam";
 import { getSession } from "../app/session";
 
 export class ProfileController {
@@ -16,6 +17,7 @@ export class ProfileController {
 
   register(router: Router) {
     router.use(authGuard);
+    router.param("id", uuidParam());
 
     router.get("/me", this.meHandler);
     router.put("/", validate(UpdateProfileDTO), this.updateHandler);

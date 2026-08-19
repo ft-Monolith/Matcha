@@ -29,6 +29,13 @@ export function PresenceDot({
   );
 }
 
+export function formatLastSeen(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
 export function PresenceText({
   userId,
   fallbackOnline,
@@ -48,7 +55,7 @@ export function PresenceText({
   if (lastSeen) {
     return (
       <span className="text-muted-foreground text-sm">
-        Last seen {new Date(lastSeen).toLocaleString()}
+        Last seen {formatLastSeen(lastSeen)}
       </span>
     );
   }

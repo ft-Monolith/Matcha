@@ -46,6 +46,13 @@ function randomAuraLocation(): {
   };
 }
 
+const LAST_SEEN_MAX_DAYS = 21;
+
+function randomLastSeen(): Date {
+  const ms = Math.random() * LAST_SEEN_MAX_DAYS * 24 * 60 * 60 * 1000;
+  return new Date(Date.now() - ms);
+}
+
 const BIOS = [
   "Coffee lover, weekend hiker and amateur cook.",
   "Just here to meet interesting people.",
@@ -124,8 +131,8 @@ async function seedOne(
   const gender = u.gender === "male" ? "man" : "woman";
 
   const [user] = await sql<{ id: string }[]>`
-    INSERT INTO users (email, username, last_name, first_name, password_hash, email_verified, onboarded)
-    VALUES (${email}, ${username}, ${u.name.last}, ${u.name.first}, ${passwordHash}, true, true)
+    INSERT INTO users (email, username, last_name, first_name, password_hash, email_verified, onboarded, last_seen)
+    VALUES (${email}, ${username}, ${u.name.last}, ${u.name.first}, ${passwordHash}, true, true, ${randomLastSeen()})
     ON CONFLICT DO NOTHING
     RETURNING id
   `;

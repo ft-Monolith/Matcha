@@ -7,6 +7,7 @@ import type {
 import type { ProfileService } from "./profile.service";
 import type { InteractionService } from "../interaction/interaction.service";
 import { authGuard } from "../app/middlewares/authGuard";
+import { uuidParam } from "../app/middlewares/uuidParam";
 import { getSession } from "../app/session";
 
 const DEFAULT_LIMIT = 20;
@@ -73,6 +74,7 @@ export class ProfilesController {
 
   register(router: Router) {
     router.use(authGuard);
+    router.param("id", uuidParam());
 
     router.get("/", this.listHandler);
     router.get("/:id", this.getByIdHandler);

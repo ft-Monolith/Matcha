@@ -1,6 +1,7 @@
 import type { Request, Response, Router } from "express";
 import type { NotificationService } from "./notification.service";
 import { authGuard } from "../app/middlewares/authGuard";
+import { uuidParam } from "../app/middlewares/uuidParam";
 import { getSession } from "../app/session";
 
 const DEFAULT_LIMIT = 20;
@@ -22,6 +23,7 @@ export class NotificationController {
 
   register(router: Router) {
     router.use(authGuard);
+    router.param("id", uuidParam());
 
     router.get("/", this.listHandler);
     router.post("/read", this.readHandler);

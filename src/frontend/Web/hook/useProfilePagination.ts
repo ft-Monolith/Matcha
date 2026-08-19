@@ -4,7 +4,7 @@ import type { Paginated } from "@common/dto/pagination.dto";
 import type { APIResponse } from "@web/API/fetchAPI";
 import { loadingWrapper } from "@web/utils/loadingWrapper";
 
-export const PROFILE_PAGE_SIZE = 24;
+const PAGE_SIZE = 24;
 
 export type FetchProfilePage = (
   limit: number,
@@ -23,7 +23,7 @@ export function useProfilePagination(fetchPage: FetchProfilePage) {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
     try {
-      const r = await fetchPage(PROFILE_PAGE_SIZE, offsetRef.current);
+      const r = await fetchPage(PAGE_SIZE, offsetRef.current);
       if (r.error) return;
       setItems((prev) => [...prev, ...r.data.items]);
       offsetRef.current += r.data.items.length;
