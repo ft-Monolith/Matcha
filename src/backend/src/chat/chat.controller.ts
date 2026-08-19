@@ -2,6 +2,7 @@ import type { Request, Response, Router } from "express";
 import { SendMessageDTO } from "@common/dto/chat.dto";
 import type { ChatService } from "./chat.service";
 import { authGuard } from "../app/middlewares/authGuard";
+import { uuidParam } from "../app/middlewares/uuidParam";
 import { validate } from "../app/middlewares/validate";
 import { getSession } from "../app/session";
 
@@ -24,6 +25,7 @@ export class ChatController {
 
   register(router: Router) {
     router.use(authGuard);
+    router.param("id", uuidParam());
 
     router.get("/", this.conversationsHandler);
     router.get("/:id", this.historyHandler);

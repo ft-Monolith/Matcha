@@ -5,7 +5,7 @@ import { Badge } from "@shadcn/ui/badge";
 import { Card, CardContent } from "@shadcn/ui/card";
 import { cn } from "@shadcn/lib/utils";
 import { GENDER_LABEL, PREF_LABEL } from "@web/component/fields/labels";
-import { usePresence } from "@web/component/PresenceIndicator";
+import { formatLastSeen, usePresence } from "@web/component/PresenceIndicator";
 import { ImageCarousel } from "@web/component/ImageCarousel";
 
 function ageFrom(birthdate: string): number {
@@ -37,6 +37,7 @@ export function ProfileCard({ profile, actions, floatingAction, fill }: ProfileC
 
   const presence = usePresence(profile.userId);
   const online = presence?.online ?? profile.online;
+  const lastSeen = presence?.lastSeen ?? profile.lastSeen;
 
   return (
     <Card
@@ -51,6 +52,7 @@ export function ProfileCard({ profile, actions, floatingAction, fill }: ProfileC
           initials={initials}
           alt={username}
           online={online}
+          lastSeen={lastSeen}
           connected={profile.likedByMe && profile.likesMe}
           likesYou={profile.likesMe}
           name={firstName}
@@ -116,6 +118,7 @@ interface ImageHeroProps {
   initials: string;
   alt: string;
   online: boolean;
+  lastSeen: string | null;
   connected: boolean;
   likesYou: boolean;
   name: string;
@@ -133,6 +136,7 @@ function ImageHero({
   initials,
   alt,
   online,
+  lastSeen,
   connected,
   likesYou,
   name,
@@ -174,7 +178,11 @@ function ImageHero({
                 "size-2 rounded-full " + (online ? "bg-green-400" : "bg-white/50")
               }
             />
-            {online ? "Online" : "Offline"}
+            {online
+              ? "Online"
+              : lastSeen
+                ? `Last seen ${formatLastSeen(lastSeen)}`
+                : "Offline"}
           </div>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/30 to-transparent px-4 pt-14 pb-5">

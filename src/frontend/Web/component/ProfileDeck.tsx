@@ -42,7 +42,6 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
   }, [fetchPage]);
 
   const currentId = items[index]?.userId ?? null;
-  const nextId = items[index + 1]?.userId ?? null;
 
   useLayoutEffect(() => {
     if (!currentId) {
@@ -68,13 +67,6 @@ export function ProfileDeck({ fetchPage, emptyMessage }: ProfileDeckProps) {
       }),
     );
   }, [currentId]);
-
-  useEffect(() => {
-    if (!nextId || cacheRef.current.has(nextId)) return;
-    API.profiles.getById(nextId).then((r) => {
-      if (!r.error) cacheRef.current.set(nextId, r.data);
-    });
-  }, [nextId]);
 
   useEffect(() => {
     if (hasNext && items.length - index <= PREFETCH_BEFORE) loadPage();
