@@ -24,6 +24,10 @@ services:
     working_dir: /app/src/backend
     command: pnpm dev
     env_file: .env
+    environment:
+      # pas de terminal interactif dans un container : pnpm doit réinstaller
+      # sans demander confirmation quand le lockfile a changé
+      CI: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,6 +46,9 @@ services:
       target: dev
     working_dir: /app/src/frontend
     command: pnpm dev
+    environment:
+      # idem backend : réinstall non interactive
+      CI: "true"
     volumes:
       - .:/app
       - root_node_modules:/app/node_modules
