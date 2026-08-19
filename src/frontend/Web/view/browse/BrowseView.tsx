@@ -10,7 +10,7 @@ import {
   type ProfileFiltersValue,
 } from "@web/component/ProfileFilters";
 
-/** Browse trie par pertinence : c'est la liste de suggestions du sujet (IV.3). */
+/** Browse trie par pertinence. */
 const BROWSE_FILTERS: ProfileFiltersValue = EMPTY_FILTERS;
 
 export function BrowseView() {
