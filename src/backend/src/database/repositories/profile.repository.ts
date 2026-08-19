@@ -51,7 +51,7 @@ export interface ProfilePreviewRow {
   likes_count: number;
   visits_count: number;
   reports_count: number;
-  distance_km?: number | null; // renseigné seulement par la recherche
+  distance_km?: number | null;
 }
 
 export class ProfileRepository {
@@ -118,7 +118,7 @@ export class ProfileRepository {
           date_part('year', age(p.birthdate))::int AS age_years,
           (4 * (SELECT count(*) FROM likes  li WHERE li.liked_id   = u.id)
              + (SELECT count(*) FROM visits vi WHERE vi.visited_id = u.id)
-             - (SELECT count(*) FROM reports rp WHERE rp.reported_id = u.id))::int AS fame,
+             - 2 * (SELECT count(*) FROM reports rp WHERE rp.reported_id = u.id))::int AS fame,
           CASE
             WHEN ${input.lat}::float8 IS NULL OR ${input.lng}::float8 IS NULL
                  OR p.latitude IS NULL OR p.longitude IS NULL THEN NULL

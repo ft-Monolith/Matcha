@@ -1,6 +1,6 @@
 export const FAME_LIKE_WEIGHT = 4;
 export const FAME_VISIT_WEIGHT = 1;
-export const FAME_REPORT_WEIGHT = 1; 
+export const FAME_REPORT_WEIGHT = 2;
 export function computeFame(
   likesReceived: number,
   visitsReceived: number,
