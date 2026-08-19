@@ -3,6 +3,7 @@ import { MapPin, Star } from "lucide-react";
 import type { ProfileDTO } from "@common/dto/profile.dto";
 import { Badge } from "@shadcn/ui/badge";
 import { Card, CardContent } from "@shadcn/ui/card";
+import { cn } from "@shadcn/lib/utils";
 import { GENDER_LABEL, PREF_LABEL } from "@web/component/fields/labels";
 import { usePresence } from "@web/component/PresenceIndicator";
 import { ImageCarousel } from "@web/component/ImageCarousel";
@@ -21,9 +22,15 @@ interface ProfileCardProps {
   actions?: ReactNode;
   /** Action ronde flottante posée en bas-droite de l'image (ex. like en consultation). */
   floatingAction?: ReactNode;
+  /**
+   * Mode « deck » : la carte occupe toute la hauteur disponible et l'image absorbe
+   * la place restante, pour que tout tienne à l'écran sans défilement.
+   * Sans cette prop, le comportement est inchangé (hauteur dictée par l'image).
+   */
+  fill?: boolean;
 }
 
-export function ProfileCard({ profile, actions, floatingAction }: ProfileCardProps) {
+export function ProfileCard({ profile, actions, floatingAction, fill }: ProfileCardProps) {
   const { firstName, lastName, username, gender, sexualPref, biography, birthdate, city, tags, pictures, fame } =
     profile;
 
@@ -37,8 +44,13 @@ export function ProfileCard({ profile, actions, floatingAction }: ProfileCardPro
   const online = presence?.online ?? profile.online;
 
   return (
-    <Card className="mx-auto w-full max-w-md gap-0 overflow-hidden p-0 pt-0 border-0 shadow-none">
-      <div className="relative">
+    <Card
+      className={cn(
+        "mx-auto w-full max-w-md gap-0 overflow-hidden border-0 p-0 pt-0 shadow-none",
+        fill && "flex h-full flex-col",
+      )}
+    >
+      <div className={cn("relative", fill && "min-h-0 flex-1")}>
         <ImageHero
           images={ordered}
           initials={initials}
@@ -52,6 +64,7 @@ export function ProfileCard({ profile, actions, floatingAction }: ProfileCardPro
           gender={gender}
           sexualPref={sexualPref}
           fame={fame}
+          fill={fill}
         />
         {floatingAction && (
           <div className="absolute right-4 -bottom-7 z-10 rounded-full ring-4 ring-white">
@@ -60,8 +73,23 @@ export function ProfileCard({ profile, actions, floatingAction }: ProfileCardPro
         )}
       </div>
 
-      <CardContent className={"flex flex-col gap-4 p-5" + (floatingAction ? " pt-8" : "")}>
-        {biography && <p className="text-sm leading-relaxed whitespace-pre-wrap">{biography}</p>}
+      <CardContent
+        className={cn(
+          "flex flex-col gap-4 p-5",
+          floatingAction && "pt-8",
+          fill && "shrink-0 gap-3 py-4",
+        )}
+      >
+        {biography && (
+          <p
+            className={cn(
+              "text-sm leading-relaxed whitespace-pre-wrap",
+              fill && "line-clamp-2",
+            )}
+          >
+            {biography}
+          </p>
+        )}
 
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -100,6 +128,7 @@ interface ImageHeroProps {
   gender: ProfileDTO["gender"];
   sexualPref: ProfileDTO["sexualPref"];
   fame: number;
+  fill?: boolean;
 }
 
 function ImageHero({
@@ -115,11 +144,13 @@ function ImageHero({
   gender,
   sexualPref,
   fame,
+  fill,
 }: ImageHeroProps) {
   return (
     <ImageCarousel
       images={images}
       alt={alt}
+      className={fill ? "aspect-auto h-full" : undefined}
       fallback={
         <span className="text-muted-foreground text-5xl font-semibold">{initials || "?"}</span>
       }
