@@ -24,11 +24,6 @@ function getPosition(opts: PositionOptions): Promise<GeolocationPosition> {
   });
 }
 
-/**
- * Récupère la position en tolérant les échecs transitoires de macOS/CoreLocation
- * (kCLErrorLocationUnknown = POSITION_UNAVAILABLE) : 1er essai rapide via le réseau
- * qui accepte une position récente en cache, puis un retry haute précision.
- */
 async function locate(): Promise<GeolocationPosition> {
   try {
     return await getPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });

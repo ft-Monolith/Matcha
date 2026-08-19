@@ -112,7 +112,6 @@ export function AuthView() {
         .register({ username, email, password, first_name: firstName, last_name: lastName })
         .then((r) => {
           if (r.error) return setError(String(r.data));
-          // On garde le username pour se connecter ; on vide les mots de passe
           setPassword("");
           setPasswordConfirm("");
           setInfo("Account created! Check your email to verify your account.");
