@@ -98,10 +98,15 @@ export async function fetchAPI<T>(
     const body = await getBody(res);
 
     if (!res.ok) {
-      const message =
-        typeof body === "object" && body !== null && "error" in body
-          ? (body as { error: string }).error
-          : res.statusText;
+      let message: string = res.statusText;
+      if (typeof body === "object" && body !== null) {
+        const b = body as { error?: string; details?: unknown };
+        if (Array.isArray(b.details) && b.details.length > 0) {
+          message = b.details.filter((d): d is string => typeof d === "string").join(" · ");
+        } else if (typeof b.error === "string") {
+          message = b.error;
+        }
+      }
 
       return { status: res.status, statusText: res.statusText, data: message, error: true };
     }

@@ -29,6 +29,11 @@ export function OnboardingView() {
   });
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function clear(field: string) {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: "" } : prev));
+  }
 
   useEffect(() => {
     API.profile.getMe().then((r) => {
@@ -51,20 +56,33 @@ export function OnboardingView() {
 
   const pictures = profile?.pictures ?? [];
 
+  // Bouton Finish actif seulement quand tout le profil requis est renseigné
+  const canFinish =
+    !!gender &&
+    !!birthdate &&
+    bio.trim() !== "" &&
+    tags.length > 0 &&
+    location.latitude != null &&
+    location.longitude != null &&
+    pictures.length > 0;
+
   function logout() {
     return loadingWrapper(setLoggingOut, () => API.auth.logout().then(() => $user.set(null)));
   }
 
   function finish() {
-    const missing: string[] = [];
-    if (!gender) missing.push("gender");
-    if (!birthdate) missing.push("birthdate");
-    if (!bio.trim()) missing.push("biography");
-    if (tags.length === 0) missing.push("at least one tag");
-    if (!location.city) missing.push("location");
-    if (pictures.length === 0) missing.push("at least one photo");
-    if (missing.length > 0) {
-      toast.error(`Please complete: ${missing.join(", ")}`);
+    const e: Record<string, string> = {};
+    if (!gender) e.gender = "Please select your gender.";
+    if (!birthdate) e.birthdate = "Please pick your birthdate.";
+    if (!bio.trim()) e.biography = "Tell us a bit about yourself.";
+    if (tags.length === 0) e.tags = "Select at least one interest.";
+    if (location.latitude == null || location.longitude == null)
+      e.location = "Set your location (allow GPS or pick your city).";
+    if (pictures.length === 0) e.photos = "Add at least one photo.";
+
+    setErrors(e);
+    if (Object.keys(e).length > 0) {
+      toast.error("Please complete the highlighted fields.");
       return;
     }
 
@@ -111,7 +129,14 @@ export function OnboardingView() {
 
       <div className="space-y-1">
         <Label>Gender</Label>
-        <GenderSelect value={gender} onChange={setGender} />
+        <GenderSelect
+          value={gender}
+          onChange={(v) => {
+            setGender(v);
+            clear("gender");
+          }}
+        />
+        {errors.gender && <p className="text-destructive text-xs">{errors.gender}</p>}
       </div>
 
       <div className="space-y-1">
@@ -121,30 +146,65 @@ export function OnboardingView() {
 
       <div className="space-y-1">
         <Label>Birthdate</Label>
-        <BirthdateField value={birthdate} onChange={setBirthdate} />
+        <BirthdateField
+          value={birthdate}
+          onChange={(v) => {
+            setBirthdate(v);
+            clear("birthdate");
+          }}
+        />
+        {errors.birthdate && <p className="text-destructive text-xs">{errors.birthdate}</p>}
       </div>
 
       <div className="space-y-1">
         <Label>Biography</Label>
-        <BioField value={bio} onChange={setBio} />
+        <BioField
+          value={bio}
+          onChange={(v) => {
+            setBio(v);
+            clear("biography");
+          }}
+        />
+        {errors.biography && <p className="text-destructive text-xs">{errors.biography}</p>}
       </div>
 
       <div className="space-y-1">
         <Label>Interests</Label>
-        <TagPicker value={tags} onChange={setTags} />
+        <TagPicker
+          value={tags}
+          onChange={(v) => {
+            setTags(v);
+            clear("tags");
+          }}
+        />
+        {errors.tags && <p className="text-destructive text-xs">{errors.tags}</p>}
       </div>
 
       <div className="space-y-1">
         <Label>Location</Label>
-        <LocationField value={location} onChange={setLocation} />
+        <LocationField
+          value={location}
+          onChange={(v) => {
+            setLocation(v);
+            clear("location");
+          }}
+        />
+        {errors.location && <p className="text-destructive text-xs">{errors.location}</p>}
       </div>
 
       <div className="space-y-1">
         <Label>Photos</Label>
-        <PhotoManager pictures={pictures} onChange={setProfile} />
+        <PhotoManager
+          pictures={pictures}
+          onChange={(p) => {
+            setProfile(p);
+            clear("photos");
+          }}
+        />
+        {errors.photos && <p className="text-destructive text-xs">{errors.photos}</p>}
       </div>
 
-      <Button onClick={finish} disabled={saving}>
+      <Button onClick={finish} disabled={saving || !canFinish}>
         {saving ? "Saving…" : "Finish"}
       </Button>
     </div>
