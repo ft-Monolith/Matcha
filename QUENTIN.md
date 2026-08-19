@@ -1,1 +1,0 @@
-installe dbeaver si tu veut visualiser la base de données

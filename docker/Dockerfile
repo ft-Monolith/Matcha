@@ -1,6 +1,5 @@
 FROM node:22-alpine AS dev
 
-# pnpm etc...
 RUN corepack enable
 
 WORKDIR /app

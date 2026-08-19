@@ -25,8 +25,6 @@ services:
     command: pnpm dev
     env_file: .env
     environment:
-      # pas de terminal interactif dans un container : pnpm doit réinstaller
-      # sans demander confirmation quand le lockfile a changé
       CI: "true"
     depends_on:
       postgres:
@@ -47,7 +45,6 @@ services:
     working_dir: /app/src/frontend
     command: pnpm dev
     environment:
-      # idem backend : réinstall non interactive
       CI: "true"
     volumes:
       - .:/app
@@ -63,16 +60,12 @@ services:
       - "8443:8443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/certs:/etc/nginx/certs
       - uploads:/app/uploads:ro
+      - ./scripts/gen-certs.sh:/docker-entrypoint.d/01-gen-certs.sh:ro
     depends_on:
       - frontend
       - backend
-
-  mailpit:
-    image: axllent/mailpit:latest
-    ports:
-      - "8025:8025"
 
 volumes:
   pg_data:
