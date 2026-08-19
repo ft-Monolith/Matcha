@@ -22,11 +22,6 @@ interface ProfileCardProps {
   actions?: ReactNode;
   /** Action ronde flottante posée en bas-droite de l'image (ex. like en consultation). */
   floatingAction?: ReactNode;
-  /**
-   * Mode « deck » : la carte occupe toute la hauteur disponible et l'image absorbe
-   * la place restante, pour que tout tienne à l'écran sans défilement.
-   * Sans cette prop, le comportement est inchangé (hauteur dictée par l'image).
-   */
   fill?: boolean;
 }
 

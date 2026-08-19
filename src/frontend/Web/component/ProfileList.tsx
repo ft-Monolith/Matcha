@@ -1,49 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { ProfilePreviewDTO } from "@common/dto/profile.dto";
-import type { Paginated } from "@common/dto/pagination.dto";
-import type { APIResponse } from "@web/API/fetchAPI";
-import { loadingWrapper } from "@web/utils/loadingWrapper";
+import { useState } from "react";
+import { useProfilePagination, type FetchProfilePage } from "@web/hook/useProfilePagination";
 import { CompactProfileCard } from "@web/component/CompactProfileCard";
 import { NextObserver } from "@web/component/NextObserver";
 import { ProfileDialog } from "@web/component/ProfileDialog";
 import { Skeleton } from "@shadcn/ui/skeleton";
 
-const PAGE_SIZE = 20;
-
 interface ProfileListProps {
-  fetchPage: (limit: number, offset: number) => Promise<APIResponse<Paginated<ProfilePreviewDTO>>>;
+  fetchPage: FetchProfilePage;
   emptyMessage?: string;
 }
 
 export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
-  const [items, setItems] = useState<ProfilePreviewDTO[]>([]);
-  const [hasNext, setHasNext] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const { items, hasNext, initialLoading, loadPage, removeItem } = useProfilePagination(fetchPage);
   const [selected, setSelected] = useState<string | null>(null);
-  const offsetRef = useRef(0);
-  const inFlightRef = useRef(false);
-
-  const loadPage = useCallback(async () => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
-    try {
-      const r = await fetchPage(PAGE_SIZE, offsetRef.current);
-      if (r.error) return;
-      setItems((prev) => [...prev, ...r.data.items]);
-      offsetRef.current += r.data.items.length;
-      setHasNext(r.data.hasNextPage);
-    } finally {
-      inFlightRef.current = false;
-    }
-  }, [fetchPage]);
-
-  useEffect(() => {
-    setItems([]);
-    setHasNext(false);
-    offsetRef.current = 0;
-    setInitialLoading(true);
-    loadingWrapper(setInitialLoading, loadPage);
-  }, [loadPage]);
 
   if (initialLoading) {
     return (
@@ -76,7 +45,7 @@ export function ProfileList({ fetchPage, emptyMessage }: ProfileListProps) {
       <ProfileDialog
         userId={selected}
         onClose={() => setSelected(null)}
-        onBlocked={(id) => setItems((prev) => prev.filter((p) => p.userId !== id))}
+        onBlocked={removeItem}
       />
     </div>
   );
