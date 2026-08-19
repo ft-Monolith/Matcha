@@ -6,6 +6,7 @@ import { Badge } from "@shadcn/ui/badge";
 import { Button } from "@shadcn/ui/button";
 import { Input } from "@shadcn/ui/input";
 import { Label } from "@shadcn/ui/label";
+import { Switch } from "@shadcn/ui/switch";
 import {
   Select,
   SelectContent,
@@ -22,13 +23,6 @@ import {
   DrawerTrigger,
 } from "@shadcn/ui/drawer";
 
-/**
- * Critères de filtrage et de tri partagés par Browse et Search.
- * Sujet IV.3 et IV.4 : âge, localisation (distance), note de popularité, tags communs.
- *
- * Les nombres sont conservés en `string` : c'est ce que renvoie un <Input>, et ça
- * distingue un champ vide (`""`) d'un zéro volontaire.
- */
 export interface ProfileFiltersValue {
   ageMin: string;
   ageMax: string;
@@ -36,6 +30,7 @@ export interface ProfileFiltersValue {
   fameMax: string;
   maxDistance: string;
   tags: string[];
+  hideFlagged: boolean;
   sort: SortField;
   order: SortOrder;
 }
@@ -47,6 +42,7 @@ export const EMPTY_FILTERS: ProfileFiltersValue = {
   fameMax: "",
   maxDistance: "",
   tags: [],
+  hideFlagged: true,
   sort: "suggestion",
   order: "desc",
 };
@@ -56,7 +52,6 @@ function num(s: string): number | undefined {
   return s.trim() !== "" && Number.isFinite(n) ? n : undefined;
 }
 
-/** Convertit les champs du formulaire en paramètres d'API. */
 export function toSearchParams(v: ProfileFiltersValue): SearchParams {
   return {
     ageMin: num(v.ageMin),
@@ -65,12 +60,12 @@ export function toSearchParams(v: ProfileFiltersValue): SearchParams {
     fameMax: num(v.fameMax),
     maxDistance: num(v.maxDistance),
     tags: v.tags,
+    hideFlagged: v.hideFlagged,
     sort: v.sort,
     order: v.order,
   };
 }
 
-/** Nombre de filtres réellement actifs, pour le badge du bouton. */
 export function countActiveFilters(p: SearchParams): number {
   let n = 0;
   if (p.ageMin !== undefined) n++;
@@ -83,12 +78,9 @@ export function countActiveFilters(p: SearchParams): number {
 }
 
 interface ProfileFiltersProps {
-  /** Le brouillon en cours d'édition (le parent en est propriétaire). */
   value: ProfileFiltersValue;
   onChange: (value: ProfileFiltersValue) => void;
-  /** Nombre de filtres appliqués, pour le badge — cf. countActiveFilters(). */
   activeCount: number;
-  /** Appelé quand l'utilisateur valide : le parent applique le brouillon. */
   onApply: () => void;
   onReset: () => void;
 }
@@ -188,6 +180,20 @@ export function ProfileFilters({
                 >
                   {value.order === "asc" ? "↑ Asc" : "↓ Desc"}
                 </Button>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <div className="space-y-0.5">
+                  <Label htmlFor="hideFlagged">Hide flagged profiles</Label>
+                  <p className="text-muted-foreground text-xs">
+                    Reported fake accounts (negative fame).
+                  </p>
+                </div>
+                <Switch
+                  id="hideFlagged"
+                  checked={value.hideFlagged}
+                  onCheckedChange={(v) => set("hideFlagged", v)}
+                />
               </div>
             </div>
 

@@ -45,7 +45,8 @@ export class BlockRepository {
           LIMIT 1
         )            AS photo,
         (SELECT count(*)::int FROM likes  li WHERE li.liked_id   = u.id) AS likes_count,
-        (SELECT count(*)::int FROM visits vi WHERE vi.visited_id = u.id) AS visits_count
+        (SELECT count(*)::int FROM visits vi WHERE vi.visited_id = u.id) AS visits_count,
+        (SELECT count(*)::int FROM reports rp WHERE rp.reported_id = u.id) AS reports_count
       FROM blocks b
       JOIN users u    ON u.id = b.blocked_id
       JOIN profiles p ON p.user_id = u.id

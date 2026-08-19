@@ -8,6 +8,7 @@ import { TagRepository } from "../database/repositories/tag.repository";
 import { PictureRepository } from "../database/repositories/picture.repository";
 import { LikeRepository } from "../database/repositories/like.repository";
 import { VisitRepository } from "../database/repositories/visit.repository";
+import { ReportRepository } from "../database/repositories/report.repository";
 import { ProfileController } from "./profile.controller";
 import { ProfileService } from "./profile.service";
 
@@ -24,6 +25,7 @@ export function buildProfileService(deps: ProfileDeps): ProfileService {
   const pictures = new PictureRepository(deps.sql);
   const likes = new LikeRepository(deps.sql);
   const visits = new VisitRepository(deps.sql);
+  const reports = new ReportRepository(deps.sql);
   return new ProfileService(
     users,
     profiles,
@@ -31,6 +33,7 @@ export function buildProfileService(deps: ProfileDeps): ProfileService {
     pictures,
     likes,
     visits,
+    reports,
     deps.transformers,
     deps.presence,
   );

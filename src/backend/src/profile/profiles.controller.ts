@@ -39,6 +39,7 @@ function parseSearchParams(query: Request["query"]): SearchParams {
     fameMax: optNum(query.fameMax),
     maxDistance: optNum(query.maxDistance),
     tags,
+    hideFlagged: query.hideFlagged !== "false",
     sort,
     order,
     limit: clampInt(query.limit, DEFAULT_LIMIT, 1, MAX_LIMIT),

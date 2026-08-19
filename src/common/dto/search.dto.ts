@@ -10,6 +10,7 @@ export interface SearchParams {
   tags?: string[];
   sort?: SortField;
   order?: SortOrder;
+  hideFlagged?: boolean;
   limit?: number;
   offset?: number;
 }

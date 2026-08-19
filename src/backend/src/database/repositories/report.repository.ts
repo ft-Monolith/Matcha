@@ -12,4 +12,11 @@ export class ReportRepository {
     `;
     return rows.length > 0;
   }
+
+  async countReceived(userId: string): Promise<number> {
+    const [row] = await this.sql<{ count: number }[]>`
+      SELECT count(*)::int AS count FROM reports WHERE reported_id = ${userId}
+    `;
+    return row?.count ?? 0;
+  }
 }

@@ -16,6 +16,7 @@ export interface ConversationRow {
   photo: string | null;
   likes_count: number;
   visits_count: number;
+  reports_count: number;
   last_id: string | null;
   last_sender_id: string | null;
   last_content: string | null;
@@ -76,6 +77,7 @@ export class MessageRepository {
            WHERE pic.user_id = u.id AND pic.is_profile = true LIMIT 1) AS photo,
         (SELECT count(*)::int FROM likes  li WHERE li.liked_id   = u.id) AS likes_count,
         (SELECT count(*)::int FROM visits vi WHERE vi.visited_id = u.id) AS visits_count,
+        (SELECT count(*)::int FROM reports rp WHERE rp.reported_id = u.id) AS reports_count,
         lm.id         AS last_id,
         lm.sender_id  AS last_sender_id,
         lm.content    AS last_content,

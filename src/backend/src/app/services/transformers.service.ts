@@ -103,7 +103,7 @@ export class TransformersService {
       age: row.birthdate ? this.ageFrom(row.birthdate) : null,
       photo: row.photo ? `/uploads/${row.photo}` : null,
       online,
-      fame: computeFame(row.likes_count, row.visits_count),
+      fame: computeFame(row.likes_count, row.visits_count, row.reports_count),
       distance: row.distance_km == null ? null : Math.round(row.distance_km * 10) / 10,
     };
   }

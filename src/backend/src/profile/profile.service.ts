@@ -24,6 +24,7 @@ import type { TagRepository } from "../database/repositories/tag.repository";
 import type { PictureRepository } from "../database/repositories/picture.repository";
 import type { LikeRepository } from "../database/repositories/like.repository";
 import type { VisitRepository } from "../database/repositories/visit.repository";
+import type { ReportRepository } from "../database/repositories/report.repository";
 import { computeFame } from "@common/constant/fame";
 import type { PresenceService } from "../app/realtime/presence.service";
 
@@ -43,6 +44,7 @@ export class ProfileService {
     private readonly pictures: PictureRepository,
     private readonly likes: LikeRepository,
     private readonly visits: VisitRepository,
+    private readonly reports: ReportRepository,
     private readonly transformers: TransformersService,
     private readonly presence: PresenceService,
   ) {}
@@ -51,18 +53,20 @@ export class ProfileService {
     const user = await this.users.findById(userId);
     if (!user) throw new HttpError(404, "User not found");
 
-    const [profile, tags, pictures, likesReceived, visitsReceived] = await Promise.all([
-      this.profiles.findByUserId(userId),
-      this.tags.findByUserId(userId),
-      this.pictures.findByUserId(userId),
-      this.likes.countReceived(userId),
-      this.visits.countReceived(userId),
-    ]);
+    const [profile, tags, pictures, likesReceived, visitsReceived, reportsReceived] =
+      await Promise.all([
+        this.profiles.findByUserId(userId),
+        this.tags.findByUserId(userId),
+        this.pictures.findByUserId(userId),
+        this.likes.countReceived(userId),
+        this.visits.countReceived(userId),
+        this.reports.countReceived(userId),
+      ]);
 
     return this.transformers.myProfileToDTO(
       { user, profile, tags, pictures },
       this.presence.isOnline(userId),
-      computeFame(likesReceived, visitsReceived),
+      computeFame(likesReceived, visitsReceived, reportsReceived),
     );
   }
 
@@ -83,6 +87,7 @@ export class ProfileService {
       fameMax: params.fameMax ?? null,
       maxDistance: params.maxDistance ?? null,
       tags: params.tags && params.tags.length > 0 ? params.tags : null,
+      hideFlagged: params.hideFlagged ?? true,
       sort: params.sort ?? "suggestion",
       order: params.order ?? "desc",
       limit,
@@ -100,23 +105,32 @@ export class ProfileService {
     const user = await this.users.findById(targetId);
     if (!user || !user.onboarded) throw new HttpError(404, "Profile not found");
 
-    const [profile, tags, pictures, likedByMe, likesMe, likesReceived, visitsReceived] =
-      await Promise.all([
-        this.profiles.findByUserId(targetId),
-        this.tags.findByUserId(targetId),
-        this.pictures.findByUserId(targetId),
-        this.likes.exists(viewerId, targetId),
-        this.likes.exists(targetId, viewerId),
-        this.likes.countReceived(targetId),
-        this.visits.countReceived(targetId),
-      ]);
+    const [
+      profile,
+      tags,
+      pictures,
+      likedByMe,
+      likesMe,
+      likesReceived,
+      visitsReceived,
+      reportsReceived,
+    ] = await Promise.all([
+      this.profiles.findByUserId(targetId),
+      this.tags.findByUserId(targetId),
+      this.pictures.findByUserId(targetId),
+      this.likes.exists(viewerId, targetId),
+      this.likes.exists(targetId, viewerId),
+      this.likes.countReceived(targetId),
+      this.visits.countReceived(targetId),
+      this.reports.countReceived(targetId),
+    ]);
 
     return this.transformers.profileToDTO(
       { user, profile, tags, pictures },
       this.presence.isOnline(targetId),
       likedByMe,
       likesMe,
-      computeFame(likesReceived, visitsReceived),
+      computeFame(likesReceived, visitsReceived, reportsReceived),
     );
   }
 

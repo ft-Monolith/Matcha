@@ -15,6 +15,7 @@ export interface SearchInput {
   fameMax: number | null;
   maxDistance: number | null;
   tags: string[] | null;
+  hideFlagged: boolean;
   sort: SortField;
   order: SortOrder;
   limit: number;
@@ -49,6 +50,7 @@ export interface ProfilePreviewRow {
   photo: string | null;
   likes_count: number;
   visits_count: number;
+  reports_count: number;
   distance_km?: number | null; // renseigné seulement par la recherche
 }
 
@@ -112,9 +114,11 @@ export class ProfileRepository {
           ) AS photo,
           (SELECT count(*)::int FROM likes  li WHERE li.liked_id   = u.id) AS likes_count,
           (SELECT count(*)::int FROM visits vi WHERE vi.visited_id = u.id) AS visits_count,
+          (SELECT count(*)::int FROM reports rp WHERE rp.reported_id = u.id) AS reports_count,
           date_part('year', age(p.birthdate))::int AS age_years,
           (4 * (SELECT count(*) FROM likes  li WHERE li.liked_id   = u.id)
-             + (SELECT count(*) FROM visits vi WHERE vi.visited_id = u.id))::int AS fame,
+             + (SELECT count(*) FROM visits vi WHERE vi.visited_id = u.id)
+             - (SELECT count(*) FROM reports rp WHERE rp.reported_id = u.id))::int AS fame,
           CASE
             WHEN ${input.lat}::float8 IS NULL OR ${input.lng}::float8 IS NULL
                  OR p.latitude IS NULL OR p.longitude IS NULL THEN NULL
@@ -158,13 +162,14 @@ export class ProfileRepository {
           )
       )
       SELECT
-        user_id, first_name, birthdate, photo, likes_count, visits_count, distance_km,
+        user_id, first_name, birthdate, photo, likes_count, visits_count, reports_count, distance_km,
         count(*) OVER()::int AS total_count
       FROM base
       WHERE (${input.ageMin}::int   IS NULL OR age_years >= ${input.ageMin})
         AND (${input.ageMax}::int   IS NULL OR age_years <= ${input.ageMax})
         AND (${input.fameMin}::int  IS NULL OR fame >= ${input.fameMin})
         AND (${input.fameMax}::int  IS NULL OR fame <= ${input.fameMax})
+        AND (${input.hideFlagged}::bool IS NOT TRUE OR fame >= 0)
         AND (${input.maxDistance}::float8 IS NULL
              OR (distance_km IS NOT NULL AND distance_km <= ${input.maxDistance}))
       ORDER BY ${orderBy}
